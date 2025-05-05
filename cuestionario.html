@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario de Investigación - Shop.co</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .cuestionario-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .dimension-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .dimension-title {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        .pregunta-item {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .likert-options {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            gap: 1rem;
+        }
+        .likert-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .demograficos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .submit-btn {
+            background: #007bff;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 2rem;
+        }
+        .submit-btn:hover {
+            background: #0056b3;
+        }
+        .resultados-container {
+            margin-top: 3rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        .grafico-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .escala-info {
+            background: #e9ecef;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 2rem;
+        }
+        .escala-info ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .escala-info li {
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra de promoción -->
+    <div class="promo-bar">
+        <p>Regístrate y obtén 20% de descuento en tu primer pedido. <a href="#" class="sign-up-link">Regístrate Ahora</a></p>
+        <button class="close-button">×</button>
+    </div>
+
+    <!-- Contenedor para el navbar reutilizable -->
+    <div class="navbar-container"></div>
+
+    <div class="cuestionario-container">
+        <h1>Cuestionario de Investigación</h1>
+        <p><strong>Título de tesis:</strong> Modelo de recomendación personalizado mediante técnica de indexación de datos para mejorar la experiencia de usuario. Caso: Outfit, Arequipa 2024</p>
+        
+        <div class="escala-info">
+            <h3>Escala tipo Likert:</h3>
+            <ul>
+                <li>1 = Totalmente en desacuerdo</li>
+                <li>2 = En desacuerdo</li>
+                <li>3 = Neutral</li>
+                <li>4 = De acuerdo</li>
+                <li>5 = Totalmente de acuerdo</li>
+            </ul>
+        </div>
+
+        <form id="cuestionario-form">
+            <!-- Variable Independiente -->
+            <h2>Variable Independiente: Modelo de recomendación personalizado</h2>
+            
+            <div class="dimension-section">
+                <h3 class="dimension-title">Dimensión 1: Calidad de recomendación</h3>
+                <div class="pregunta-item">
+                    <p>Las recomendaciones suelen coincidir con mis gustos personales.</p>
+                    <div class="likert-options">
+                        <label class="likert-option"><input type="radio" name="calidad_1" value="1" required> 1</label>
+                        <label class="likert-option"><input type="radio" name="calidad_1" value="2"> 2</label>
+                        <label class="likert-option"><input type="radio" name="calidad_1" value="3"> 3</label>
+                        <label class="likert-option"><input type="radio" name="calidad_1" value="4"> 4</label>
+                        <label class="likert-option"><input type="radio" name="calidad_1" value="5"> 5</label>
+                    </div>
+                </div>
+                <div class="pregunta-item">
+                    <p>Las recomendaciones abarcan productos realmente relevantes para mí.</p>
+                    <div class="likert-options">
+                        <label class="likert-option"><input type="radio" name="calidad_2" value="1" required> 1</label>
+                        <label class="likert-option"><input type="radio" name="calidad_2" value="2"> 2</label>
+                        <label class="likert-option"><input type="radio" name="calidad_2" value="3"> 3</label>
+                        <label class="likert-option"><input type="radio" name="calidad_2" value="4"> 4</label>
+                        <label class="likert-option"><input type="radio" name="calidad_2" value="5"> 5</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dimension-section">
+                <h3 class="dimension-title">Dimensión 2: Personalización percibida</h3>
+                <div class="pregunta-item">
+                    <p>Las sugerencias que recibo se ajustan a mis preferencias individuales.</p>
+                    <div class="likert-options">
+                        <label class="likert-option"><input type="radio" name="personal_1" value="1" required> 1</label>
+                        <label class="likert-option"><input type="radio" name="personal_1" value="2"> 2</label>
+                        <label class="likert-option"><input type="radio" name="personal_1" value="3"> 3</label>
+                        <label class="likert-option"><input type="radio" name="personal_1" value="4"> 4</label>
+                        <label class="likert-option"><input type="radio" name="personal_1" value="5"> 5</label>
+                    </div>
+                </div>
+                <div class="pregunta-item">
+                    <p>Las recomendaciones me son útiles para decidir qué prendas comprar o usar.</p>
+                    <div class="likert-options">
+                        <label class="likert-option"><input type="radio" name="personal_2" value="1" required> 1</label>
+                        <label class="likert-option"><input type="radio" name="personal_2" value="2"> 2</label>
+                        <label class="likert-option"><input type="radio" name="personal_2" value="3"> 3</label>
+                        <label class="likert-option"><input type="radio" name="personal_2" value="4"> 4</label>
+                        <label class="likert-option"><input type="radio" name="personal_2" value="5"> 5</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Continuar con todas las dimensiones y preguntas -->
+            <div class="dimension-section">
+                <h3 class="dimension-title">Dimensión 3: Diversidad de recomendaciones</h3>
+                <div class="pregunta-item">
+                    <p>Las recomendaciones me ofrecen una variedad amplia de opciones.</p>
+                    <div class="likert-options">
+                        <label class="likert-option"><input type="radio" name="diversidad_1" value="1" required> 1</label>
+                        <label class="likert-option"><input type="radio" name="diversidad_1" value="2"> 2</label>
+                        <label class="likert-option"><input type="radio" name="diversidad_1" value="3"> 3</label>
+                        <label class="likert-option"><input type="radio" name="diversidad_1" value="4"> 4</label>
+                        <label class="likert-option"><input type="radio" name="diversidad_1" value="5"> 5</label>
+                    </div>
+                </div>
+                <div class="pregunta-item">
+                    <p>Frecuentemente encuentro prendas novedosas gracias al sistema.</p>
+                    <div class="likert-options">
+                        <label class="likert-option"><input type="radio" name="diversidad_2" value="1" required> 1</label>
+                        <label class="likert-option"><input type="radio" name="diversidad_2" value="2"> 2</label>
+                        <label class="likert-option"><input type="radio" name="diversidad_2" value="3"> 3</label>
+                        <label class="likert-option"><input type="radio" name="diversidad_2" value="4"> 4</label>
+                        <label class="likert-option"><input type="radio" name="diversidad_2" value="5"> 5</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dimension-section">
+                <h3 class="dimension-title">Dimensión 4: Inteligencia Artificial</h3>
+                <div class="pregunta-item">
+                    <p>Las recomendaciones generadas por el sistema son precisas gracias al uso de IA.</p>
+                    <div class="likert-options">
+                        <label class="likert-option"><input type="radio" name="ia_1" value="1" required> 1</label>
+                        <label class="likert-option"><input type="radio" name="ia_1" value="2"> 2</label>
+                        <label class="likert-option"><input type="radio" name="ia_1" value="3"> 3</label>
+                        <label class="likert-option"><input type="radio" name="ia_1" value="4"> 4</label>
+                        <label class="likert-option"><input type="radio" name="ia_1" value="5"> 5</label>
+                    </div>
+                </div>
+                <div class="pregunta-item">
+                    <p>El sistema aprende de mis elecciones anteriores y mejora con el tiempo.</p>
+                    <div class="likert-options">
+                        <label class="likert-option"><input type="radio" name="ia_2" value="1" required> 1</label>
+                        <label class="likert-option"><input type="radio" name="ia_2" value="2"> 2</label>
+                        <label class="likert-option"><input type="radio" name="ia_2" value="3"> 3</label>
+                        <label class="likert-option"><input type="radio" name="ia_2" value="4"> 4</label>
+                        <label class="likert-option"><input type="radio" name="ia_2" value="5"> 5</label>
+                    </div>
+                </div>
+                <div class="pregunta-item">
+                    <p>Percibo que las recomendaciones se adaptan a mis cambios de preferencia.</p>
+                    <div class="likert-options">
+                        <label class="likert-option"><input type="radio" name="ia_3" value="1" required> 1</label>
+                        <label class="likert-option"><input type="radio" name="ia_3" value="2"> 2</label>
+                        <label class="likert-option"><input type="radio" name="ia_3" value="3"> 3</label>
+                        <label class="likert-option"><input type="radio" name="ia_3" value="4"> 4</label>
+                        <label class="likert-option"><input type="radio" name="ia_3" value="5"> 5</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dimension-section">
+                <h3 class="dimension-title">Dimensión 5: Indexación de datos</h3>
+                <div class="pregunta-item">
+                    <p>El sistema responde de forma rápida cuando busco productos.</p>
+                    <div class="likert-options">
+                        <label class="likert-option"><input type="radio" name="indexacion_1" value="1" required> 1</label>
+                        <label class="likert-option"><input type="radio" name="indexacion_1" value="2"> 2</label>
+                        <label class="likert-option"><input type="radio" name="indexacion_1" value="3"> 3</label>
+                        <label class="likert-option"><input type="radio" name="indexacion_1" value="4"> 4</label>
+                        <label class="likert-option"><input type="radio" name="indexacion_1" value="5"> 5</label>
+                    </div>
+                </div>
+                <div class="pregunta-item">
+                    <p>Las recomendaciones están basadas en información actualizada.</p>
+                    <div class="likert-options">
+                        <label class="likert-option"><input type="radio" name="indexacion_2" value="1" required> 1</label>
+                        <label class="likert-option"><input type="radio" name="indexacion_2" value="2"> 2</label>
+                        <label class="likert-option"><input type="radio" name="indexacion_2" value="3"> 3</label>
+                        <label class="likert-option"><input type="radio" name="indexacion_2" value="4"> 4</label>
+                        <label class="likert-option"><input type="radio" name="indexacion_2" value="5"> 5</label>
+                    </div>
+                </div>
+                <div class="pregunta-item">
+                    <p>Considero relevante la información mostrada por el sistema.</p>
+                    <div class="likert-options">
+                        <label class="likert-option"><input type="radio" name="indexacion_3" value="1" required> 1</label>
+                        <label class="likert-option"><input type="radio" name="indexacion_3" value="2"> 2</label>
+                        <label class="likert-option"><input type="radio" name="indexacion_3" value="3"> 3</label>
+                        <label class="likert-option"><input type="radio" name="indexacion_3" value="4"> 4</label>
+                        <label class="likert-option"><input type="radio" name="indexacion_3" value="5"> 5</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Variable Dependiente -->
+            <h2>Variable Dependiente: Experiencia del usuario</h2>
+
+            <div class="dimension-section">
+                <h3 class="dimension-title">Dimensión 1: Usabilidad</h3>
+                <div class="pregunta-item">
+                    <p>La plataforma es fácil de entender y utilizar.</p>
+                    <div class="likert-options">
+                        <label class="likert-option"><input type="radio" name="usabilidad_1" value="1" required> 1</label>
+                        <label class="likert-option"><input type="radio" name="usabilidad_1" value="2"> 2</label>
+                        <label class="likert-option"><input type="radio" name="usabilidad_1" value="3"> 3</label>
+                        <label class="likert-option"><input type="radio" name="usabilidad_1" value="4"> 4</label>
+                        <label class="likert-option"><input type="radio" name="usabilidad_1" value="5"> 5</label>
+                    </div>
+                </div>
+                <div class="pregunta-item">
+                    <p>No tengo dificultades para completar tareas como buscar o seleccionar productos.</p>
+                    <div class="likert-options">
+                        <label class="likert-option"><input type="radio" name="usabilidad_2" value="1" required> 1</label>
+                        <label class="likert-option"><input type="radio" name="usabilidad_2" value="2"> 2</label>
+                        <label class="likert-option"><input type="radio" name="usabilidad_2" value="3"> 3</label>
+                        <label class="likert-option"><input type="radio" name="usabilidad_2" value="4"> 4</label>
+                        <label class="likert-option"><input type="radio" name="usabilidad_2" value="5"> 5</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dimension-section">
+                <h3 class="dimension-title">Dimensión 2: Satisfacción</h3>
+                <div class="pregunta-item">
+                    <p>Me siento satisfecho(a) con la experiencia general del sistema.</p>
+                    <div class="likert-options">
+                        <label class="likert-option"><input type="radio" name="satisfaccion_1" value="1" required> 1</label>
+                        <label class="likert-option"><input type="radio" name="satisfaccion_1" value="2"> 2</label>
+                        <label class="likert-option"><input type="radio" name="satisfaccion_1" value="3"> 3</label>
+                        <label class="likert-option"><input type="radio" name="satisfaccion_1" value="4"> 4</label>
+                        <label class="likert-option"><input type="radio" name="satisfaccion_1" value="5"> 5</label>
+                    </div>
+                </div>
+                <div class="pregunta-item">
+                    <p>Continuaré usando la plataforma debido a sus recomendaciones.</p>
+                    <div class="likert-options">
+                        <label class="likert-option"><input type="radio" name="satisfaccion_2" value="1" required> 1</label>
+                        <label class="likert-option"><input type="radio" name="satisfaccion_2" value="2"> 2</label>
+                        <label class="likert-option"><input type="radio" name="satisfaccion_2" value="3"> 3</label>
+                        <label class="likert-option"><input type="radio" name="satisfaccion_2" value="4"> 4</label>
+                        <label class="likert-option"><input type="radio" name="satisfaccion_2" value="5"> 5</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dimension-section">
+                <h3 class="dimension-title">Dimensión 3: Fidelización</h3>
+                <div class="pregunta-item">
+                    <p>Uso la plataforma al menos una vez por semana.</p>
+                    <div class="likert-options">
+                        <label class="likert-option"><input type="radio" name="fidelizacion_1" value="1" required> 1</label>
+                        <label class="likert-option"><input type="radio" name="fidelizacion_1" value="2"> 2</label>
+                        <label class="likert-option"><input type="radio" name="fidelizacion_1" value="3"> 3</label>
+                        <label class="likert-option"><input type="radio" name="fidelizacion_1" value="4"> 4</label>
+                        <label class="likert-option"><input type="radio" name="fidelizacion_1" value="5"> 5</label>
+                    </div>
+                </div>
+                <div class="pregunta-item">
+                    <p>Paso bastante tiempo navegando por las recomendaciones de la plataforma.</p>
+                    <div class="likert-options">
+                        <label class="likert-option"><input type="radio" name="fidelizacion_2" value="1" required> 1</label>
+                        <label class="likert-option"><input type="radio" name="fidelizacion_2" value="2"> 2</label>
+                        <label class="likert-option"><input type="radio" name="fidelizacion_2" value="3"> 3</label>
+                        <label class="likert-option"><input type="radio" name="fidelizacion_2" value="4"> 4</label>
+                        <label class="likert-option"><input type="radio" name="fidelizacion_2" value="5"> 5</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Demográfica -->
+            <h2>Información Demográfica</h2>
+            <div class="demograficos">
+                <div>
+                    <p>Sexo:</p>
+                    <select name="sexo" required>
+                        <option value="">Seleccione...</option>
+                        <option value="masculino">Masculino</option>
+                        <option value="femenino">Femenino</option>
+                    </select>
+                </div>
+                <div>
+                    <p>Edad:</p>
+                    <select name="edad" required>
+                        <option value="">Seleccione...</option>
+                        <option value="18-25">18-25</option>
+                        <option value="26-35">26-35</option>
+                        <option value="36-49">36-49</option>
+                        <option value="50+">50 a más</option>
+                    </select>
+                </div>
+                <div>
+                    <p>Nivel educativo:</p>
+                    <select name="educacion" required>
+                        <option value="">Seleccione...</option>
+                        <option value="secundaria">Secundaria</option>
+                        <option value="tecnico">Técnico</option>
+                        <option value="universitario">Universitario</option>
+                        <option value="posgrado">Posgrado</option>
+                    </select>
+                </div>
+                <div>
+                    <p>Frecuencia de compra online de ropa:</p>
+                    <select name="frecuencia_compra" required>
+                        <option value="">Seleccione...</option>
+                        <option value="nunca">Nunca</option>
+                        <option value="aveces">A veces</option>
+                        <option value="frecuentemente">Frecuentemente</option>
+                        <option value="siempre">Siempre</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">Enviar Respuestas</button>
+        </form>
+
+        <div class="resultados-container">
+            <div class="grafico-card">
+                <canvas id="calidadChart"></canvas>
+            </div>
+            <div class="grafico-card">
+                <canvas id="personalizacionChart"></canvas>
+            </div>
+            <div class="grafico-card">
+                <canvas id="diversidadChart"></canvas>
+            </div>
+            <div class="grafico-card">
+                <canvas id="iaChart"></canvas>
+            </div>
+            <div class="grafico-card">
+                <canvas id="indexacionChart"></canvas>
+            </div>
+            <div class="grafico-card">
+                <canvas id="usabilidadChart"></canvas>
+            </div>
+            <div class="grafico-card">
+                <canvas id="satisfaccionChart"></canvas>
+            </div>
+            <div class="grafico-card">
+                <canvas id="fidelizacionChart"></canvas>
+            </div>
+            <div class="grafico-card">
+                <canvas id="demograficosChart"></canvas>
+            </div>
+        </div>
+
+        <!-- --- ESTILOS MEJORADOS PARA TABLA Y PANEL ---
+        const style2 = document.createElement('style');
+        style2.innerHTML = `
+        #panel-respuestas-individual, #tabla-respuestas-individual {
+            background: #f8f9fa;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(44,62,80,0.09);
+            padding: 2.5rem 2rem;
+            margin-bottom: 2.5rem;
+        }
+        #panel-respuestas-individual h2, #tabla-respuestas-individual h2 {
+            color: #2563eb;
+            font-size: 1.5rem;
+            margin-bottom: 1.2rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+        #panel-respuestas-individual label {
+            font-weight: 600;
+            color: #34495e;
+            font-size: 1.1rem;
+        }
+        #panel-respuestas-individual select {
+            border-radius: 8px;
+            border: 1.5px solid #d1d5db;
+            padding: 0.5rem 1.2rem;
+            font-size: 1.05rem;
+            margin-left: 0.7rem;
+            background: #fff;
+            transition: border 0.2s;
+        }
+        #panel-respuestas-individual select:focus {
+            border: 2px solid #2563eb;
+            outline: none;
+        }
+        #respuestas-usuario-detalle ul {
+            list-style: none;
+            padding: 0;
+            margin: 1.2rem 0 0 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+        }
+        #respuestas-usuario-detalle li {
+            background: #fff;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            padding: 1rem 1.3rem;
+            box-shadow: 0 1px 4px rgba(44,62,80,0.07);
+            border-left: 5px solid #2563eb;
+            min-width: 260px;
+            max-width: 350px;
+            flex: 1 1 260px;
+            font-size: 1.05rem;
+        }
+        #respuestas-usuario-detalle strong {
+            color: #2563eb;
+        }
+        #tabla-respuestas-individual table {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 1px 8px rgba(44,62,80,0.08);
+            border-spacing: 0;
+        }
+        #tabla-respuestas-individual th, #tabla-respuestas-individual td {
+            padding: 0.9rem 0.7rem;
+            text-align: center;
+            font-size: 1.01rem;
+            max-width: 220px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        #tabla-respuestas-individual th {
+            background: #e3eafc;
+            color: #1e293b;
+            font-weight: 700;
+            border-bottom: 2px solid #d1d5db;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+        #tabla-respuestas-individual tr {
+            transition: background 0.2s;
+        }
+        #tabla-respuestas-individual tr:nth-child(even) {
+            background: #f3f6fb;
+        }
+        #tabla-respuestas-individual tr:nth-child(odd) {
+            background: #fff;
+        }
+        #tabla-respuestas-individual tr:hover {
+            background: #e0e7ff;
+        }
+        #tabla-respuestas-individual td {
+            border-bottom: 1px solid #f0f0f0;
+        }
+        #tabla-respuestas-individual tr:last-child td {
+            border-bottom: none;
+        }
+        `;
+        document.head.appendChild(style2); -->
+    </div>
+
+    <script type="module">
+        // Variables globales para panel y tabla de respuestas
+        let panelRespuestasDiv;
+        let tablaRespuestasDiv;
+        // --- MAPA DE PREGUNTAS LEÍBLES ---
+        const PREGUNTAS_LEIBLES = {
+            'calidad_1': 'Las recomendaciones suelen coincidir con mis gustos personales.',
+            'calidad_2': 'Las recomendaciones abarcan productos realmente relevantes para mí.',
+            'personal_1': 'Las sugerencias que recibo se ajustan a mis preferencias individuales.',
+            'personal_2': 'Las recomendaciones me son útiles para decidir qué prendas comprar o usar.',
+            'diversidad_1': 'Las recomendaciones me ofrecen una variedad amplia de opciones.',
+            'diversidad_2': 'Frecuentemente encuentro prendas novedosas gracias al sistema.',
+            'ia_1': 'Las recomendaciones generadas por el sistema son precisas gracias al uso de IA.',
+            'ia_2': 'El sistema aprende de mis elecciones anteriores y mejora con el tiempo.',
+            'ia_3': 'Percibo que las recomendaciones se adaptan a mis cambios de preferencia.',
+            'indexacion_1': 'El sistema responde de forma rápida cuando busco productos.',
+            'indexacion_2': 'Las recomendaciones están basadas en información actualizada.',
+            'indexacion_3': 'Considero relevante la información mostrada por el sistema.',
+            'usabilidad_1': 'La plataforma es fácil de entender y utilizar.',
+            'usabilidad_2': 'No tengo dificultades para completar tareas como buscar o seleccionar productos.',
+            'satisfaccion_1': 'Me siento satisfecho(a) con la experiencia general del sistema.',
+            'satisfaccion_2': 'Continuaré usando la plataforma debido a sus recomendaciones.',
+            'fidelizacion_1': 'Uso la plataforma al menos una vez por semana.',
+            'fidelizacion_2': 'Paso bastante tiempo navegando por las recomendaciones de la plataforma.',
+            'sexo': 'Sexo',
+            'edad': 'Edad',
+            'educacion': 'Nivel educativo',
+            'frecuencia_compra': 'Frecuencia de compra online de ropa'
+        };
+
+        import { db, auth } from './js/firebase-config.js';
+        import { collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Objeto para almacenar las instancias de los gráficos
+        let charts = {
+            calidad: null,
+            personalizacion: null,
+            diversidad: null,
+            ia: null,
+            indexacion: null,
+            usabilidad: null,
+            satisfaccion: null,
+            fidelizacion: null,
+            demograficos: null
+        };
+
+        // Función para destruir un gráfico existente
+        function destroyChart(chartId) {
+            if (charts[chartId]) {
+                charts[chartId].destroy();
+                charts[chartId] = null;
+            }
+        }
+
+        // Función para calcular la distribución de respuestas en escala Likert
+        function calcularDistribucion(respuestas, campos) {
+            const distribucion = [0, 0, 0, 0, 0];
+            respuestas.forEach(respuesta => {
+                campos.forEach(campo => {
+                    const valor = parseInt(respuesta[campo]);
+                    if (valor >= 1 && valor <= 5) {
+                        distribucion[valor - 1]++;
+                    }
+                });
+            });
+            return distribucion;
+        }
+
+        // Función para calcular estadísticas descriptivas
+        function calcularEstadisticas(respuestas, campos) {
+            const valores = [];
+            respuestas.forEach(respuesta => {
+                campos.forEach(campo => {
+                    const valor = parseInt(respuesta[campo]);
+                    if (valor >= 1 && valor <= 5) {
+                        valores.push(valor);
+                    }
+                });
+            });
+            if (valores.length === 0) {
+                return { media: 0, desviacion: 0, moda: 0, total: 0 };
+            }
+            const media = valores.reduce((a, b) => a + b, 0) / valores.length;
+            const desviacion = Math.sqrt(valores.reduce((a, b) => a + Math.pow(b - media, 2), 0) / valores.length);
+            const moda = valores.sort((a,b) => valores.filter(v => v===a).length - valores.filter(v => v===b).length).pop();
+            return {
+                media: media.toFixed(2),
+                desviacion: desviacion.toFixed(2),
+                moda: moda,
+                total: valores.length
+            };
+        }
+
+        // Sobrescribir cada función de gráfico para mostrar mensaje si no hay datos
+        function mostrarSinDatos(ctx, mensaje = 'Sin datos') {
+            ctx.save();
+            ctx.font = '18px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.fillText(mensaje, ctx.canvas.width / 2, ctx.canvas.height / 2);
+            ctx.restore();
+        }
+
+        // Función para enviar respuestas
+        document.getElementById('cuestionario-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!auth.currentUser) {
+                alert('Debe iniciar sesión para enviar el cuestionario');
+                return;
+            }
+
+            try {
+                const formData = new FormData(e.target);
+                const formEntries = Object.fromEntries(formData);
+                
+                // Validar que todos los campos requeridos estén completos
+                for (let [key, value] of Object.entries(formEntries)) {
+                    if (!value) {
+                        throw new Error(`Por favor complete todos los campos del cuestionario`);
+                    }
+                }
+
+                // Crear objeto de respuestas
+                const respuestas = {
+                    userId: auth.currentUser.uid,
+                    userEmail: auth.currentUser.email,
+                    timestamp: new Date().toISOString(),
+                    respuestas: formEntries
+                };
+
+                console.log('Enviando respuestas:', respuestas);
+
+                // Enviar a Firestore
+                const docRef = await addDoc(collection(db, 'respuestas_cuestionario'), respuestas);
+                console.log('Respuestas guardadas con ID:', docRef.id);
+
+                // Actualizar gráficos
+                await actualizarGraficos();
+                
+                alert('¡Gracias por sus respuestas!');
+                
+                // Opcional: limpiar el formulario
+                e.target.reset();
+
+            } catch (error) {
+                console.error('Error al guardar respuestas:', error);
+                alert(error.message || 'Error al enviar respuestas. Por favor, intente nuevamente.');
+            }
+        });
+
+        // Función para actualizar gráficos
+        async function actualizarGraficos() {
+            try {
+                console.log('Actualizando gráficos...');
+                const respuestasRef = collection(db, 'respuestas_cuestionario');
+                const q = query(respuestasRef, orderBy('timestamp', 'desc'));
+                const snapshot = await getDocs(q);
+                if (snapshot.empty) {
+                    console.log('No hay respuestas guardadas');
+                    // Mostrar mensaje en cada canvas
+                    Object.keys(charts).forEach(chartId => {
+                        const canvas = document.getElementById(chartId + 'Chart');
+                        if (canvas) mostrarSinDatos(canvas.getContext('2d'));
+                    });
+                    return;
+                }
+
+                // Procesar respuestas
+                const respuestas = snapshot.docs.map(doc => ({...doc.data().respuestas, userEmail: doc.data().userEmail, userId: doc.data().userId, timestamp: doc.data().timestamp }));
+                console.log('Respuestas obtenidas:', respuestas);
+
+                // Destruir todos los gráficos existentes
+                Object.keys(charts).forEach(destroyChart);
+
+                // Actualizar cada gráfico
+                actualizarGraficoCalidad(respuestas);
+                actualizarGraficoPersonalizacion(respuestas);
+                actualizarGraficoDiversidad(respuestas);
+                actualizarGraficoIA(respuestas);
+                actualizarGraficoIndexacion(respuestas);
+                actualizarGraficoUsabilidad(respuestas);
+                actualizarGraficoSatisfaccion(respuestas);
+                actualizarGraficoFidelizacion(respuestas);
+                actualizarGraficoDemograficos(respuestas);
+
+                // --- ESTILOS MEJORADOS PARA TABLA Y PANEL ---
+                const style2 = document.createElement('style');
+                style2.innerHTML = `
+                #panel-respuestas-individual, #tabla-respuestas-individual {
+                    background: #f8f9fa;
+                    border-radius: 16px;
+                    box-shadow: 0 2px 12px rgba(44,62,80,0.09);
+                    padding: 2.5rem 2rem;
+                    margin-bottom: 2.5rem;
+                }
+                #panel-respuestas-individual h2, #tabla-respuestas-individual h2 {
+                    color: #2563eb;
+                    font-size: 1.5rem;
+                    margin-bottom: 1.2rem;
+                    font-weight: 800;
+                    letter-spacing: 0.5px;
+                }
+                #panel-respuestas-individual label {
+                    font-weight: 600;
+                    color: #34495e;
+                    font-size: 1.1rem;
+                }
+                #panel-respuestas-individual select {
+                    border-radius: 8px;
+                    border: 1.5px solid #d1d5db;
+                    padding: 0.5rem 1.2rem;
+                    font-size: 1.05rem;
+                    margin-left: 0.7rem;
+                    background: #fff;
+                    transition: border 0.2s;
+                }
+                #panel-respuestas-individual select:focus {
+                    border: 2px solid #2563eb;
+                    outline: none;
+                }
+                #respuestas-usuario-detalle ul {
+                    list-style: none;
+                    padding: 0;
+                    margin: 1.2rem 0 0 0;
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 1.2rem;
+                }
+                #respuestas-usuario-detalle li {
+                    background: #fff;
+                    border-radius: 10px;
+                    margin-bottom: 0.5rem;
+                    padding: 1rem 1.3rem;
+                    box-shadow: 0 1px 4px rgba(44,62,80,0.07);
+                    border-left: 5px solid #2563eb;
+                    min-width: 260px;
+                    max-width: 350px;
+                    flex: 1 1 260px;
+                    font-size: 1.05rem;
+                }
+                #respuestas-usuario-detalle strong {
+                    color: #2563eb;
+                }
+                #tabla-respuestas-individual table {
+                    width: 100%;
+                    border-radius: 12px;
+                    overflow: hidden;
+                    background: #fff;
+                    box-shadow: 0 1px 8px rgba(44,62,80,0.08);
+                    border-spacing: 0;
+                }
+                #tabla-respuestas-individual th, #tabla-respuestas-individual td {
+                    padding: 0.9rem 0.7rem;
+                    text-align: center;
+                    font-size: 1.01rem;
+                    max-width: 220px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                #tabla-respuestas-individual th {
+                    background: #e3eafc;
+                    color: #1e293b;
+                    font-weight: 700;
+                    border-bottom: 2px solid #d1d5db;
+                    position: sticky;
+                    top: 0;
+                    z-index: 2;
+                }
+                #tabla-respuestas-individual tr {
+                    transition: background 0.2s;
+                }
+                #tabla-respuestas-individual tr:nth-child(even) {
+                    background: #f3f6fb;
+                }
+                #tabla-respuestas-individual tr:nth-child(odd) {
+                    background: #fff;
+                }
+                #tabla-respuestas-individual tr:hover {
+                    background: #e0e7ff;
+                }
+                #tabla-respuestas-individual td {
+                    border-bottom: 1px solid #f0f0f0;
+                }
+                #tabla-respuestas-individual tr:last-child td {
+                    border-bottom: none;
+                }
+                `;
+                document.head.appendChild(style2);
+
+                // Mejorar renderizarPanelYTabla para usar nombres legibles y mejor diseño
+                function renderizarPanelYTabla(respuestas) {
+                    // Crear contenedores si no existen
+                    if (!panelRespuestasDiv) {
+                        panelRespuestasDiv = document.createElement('div');
+                        panelRespuestasDiv.id = 'panel-respuestas-individual';
+                        panelRespuestasDiv.style.margin = '2rem 0';
+                        document.querySelector('.cuestionario-container').appendChild(panelRespuestasDiv);
+                    }
+                    if (!tablaRespuestasDiv) {
+                        tablaRespuestasDiv = document.createElement('div');
+                        tablaRespuestasDiv.id = 'tabla-respuestas-individual';
+                        tablaRespuestasDiv.style.margin = '2rem 0';
+                        document.querySelector('.cuestionario-container').appendChild(tablaRespuestasDiv);
+                    }
+
+                    // --- PANEL DE USUARIO ---
+                    let emails = respuestas.map(r => r.userEmail || 'Anónimo');
+                    let uniqueEmails = [...new Set(emails)];
+                    let panelHTML = `<h2 style='font-size:1.3rem;margin-bottom:1rem;'>Respuestas individuales por usuario</h2>`;
+                    panelHTML += `<label style='font-size:1rem;'>Selecciona usuario: <select id="select-usuario">`;
+                    uniqueEmails.forEach((email, i) => {
+                        panelHTML += `<option value="${email}">${email}</option>`;
+                    });
+                    panelHTML += `</select></label>`;
+                    panelHTML += `<div id="respuestas-usuario-detalle" style="margin-top:1rem;"></div>`;
+                    panelRespuestasDiv.innerHTML = panelHTML;
+
+                    // Mostrar respuestas del primer usuario por defecto
+                    mostrarRespuestasDeUsuario(respuestas, uniqueEmails[0]);
+                    document.getElementById('select-usuario').addEventListener('change', function() {
+                        mostrarRespuestasDeUsuario(respuestas, this.value);
+                    });
+
+                    // --- TABLA DE RESPUESTAS ---
+                    let preguntas = Object.keys(respuestas[0]).filter(k => !['userId','userEmail','timestamp'].includes(k));
+                    let tablaHTML = `<h2 style='font-size:1.3rem;margin-bottom:1rem;'>Tabla de todas las respuestas individuales</h2>`;
+                    tablaHTML += `<div style="overflow-x:auto;"><table border="0" cellpadding="4" style="border-collapse:collapse;min-width:900px;">
+                        <thead><tr style='background:#e3eafc;'>`;
+                    tablaHTML += `<th style='font-size:1rem;'>#</th><th style='font-size:1rem;'>Email</th>`;
+                    preguntas.forEach(p => { 
+                        tablaHTML += `<th title='${PREGUNTAS_LEIBLES[p] || p}' style='font-size:1rem;max-width:220px;white-space:normal;'>${PREGUNTAS_LEIBLES[p] || p}</th>`; 
+                    });
+                    tablaHTML += `</tr></thead><tbody>`;
+                    respuestas.forEach((r, idx) => {
+                        tablaHTML += `<tr style='background:${idx%2===0?'#fff':'#f8f9fa'};'>`;
+                        tablaHTML += `<td>${idx+1}</td><td>${r.userEmail || 'Anónimo'}</td>`;
+                        preguntas.forEach(p => { tablaHTML += `<td>${r[p] || ''}</td>`; });
+                        tablaHTML += `</tr>`;
+                    });
+                    tablaHTML += `</tbody></table></div>`;
+                    tablaRespuestasDiv.innerHTML = tablaHTML;
+                }
+
+                function mostrarRespuestasDeUsuario(respuestas, email) {
+                    let usuario = respuestas.find(r => (r.userEmail || 'Anónimo') === email);
+                    if (!usuario) {
+                        document.getElementById('respuestas-usuario-detalle').innerHTML = '<em>No hay respuestas para este usuario.</em>';
+                        return;
+                    }
+                    // Ordenar por dimensiones y mostrar legible
+                    const orden = [
+                        'calidad_1','calidad_2',
+                        'personal_1','personal_2',
+                        'diversidad_1','diversidad_2',
+                        'ia_1','ia_2','ia_3',
+                        'indexacion_1','indexacion_2','indexacion_3',
+                        'usabilidad_1','usabilidad_2',
+                        'satisfaccion_1','satisfaccion_2',
+                        'fidelizacion_1','fidelizacion_2',
+                        'sexo','edad','educacion','frecuencia_compra'
+                    ];
+                    let html = '<ul style="padding-left:0;">';
+                    orden.forEach(k => {
+                        if (usuario[k] !== undefined) {
+                            html += `<li style='margin-bottom:0.5rem;'><strong>${PREGUNTAS_LEIBLES[k] || k}:</strong> ${usuario[k]}</li>`;
+                        }
+                    });
+                    html += '</ul>';
+                    document.getElementById('respuestas-usuario-detalle').innerHTML = html;
+                }
+
+                renderizarPanelYTabla(respuestas);
+
+            } catch (error) {
+                console.error('Error al actualizar gráficos:', error);
+            }
+        }
+
+        // Configuración Gemini IA
+        const GEMINI_API_KEY = 'AIzaSyA0PkP6I-6U8Rob-i7_kJmKex6d3fePkDg';
+        const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
+
+        // Función para generar interpretación IA para un gráfico
+        async function generarDescripcionIA(nombre, datos, total, labels) {
+            const prompt = `Eres un experto en estadística y visualización de datos. Analiza e interpreta en español los resultados de la siguiente dimensión de un cuestionario tipo Likert (1-5). Sé claro, breve y conciso. Da una interpretación directa, fácil de entender, sin explicaciones largas ni rebuscadas. Incluye solo lo esencial: tendencia, valor más frecuente y una conclusión rápida sobre la experiencia del usuario. No repitas el nombre de la dimensión más de una vez.\n\nDimensión: ${nombre}\nDistribución de respuestas: ${labels.map((l,i)=>`${l}: ${datos[i]}`).join(', ')} (Total: ${total})`;
+            try {
+                const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }]
+                    })
+                });
+                if (!response.ok) throw new Error('Error en la API Gemini');
+                const data = await response.json();
+                if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0]) {
+                    throw new Error('Respuesta inválida de Gemini');
+                }
+                return data.candidates[0].content.parts[0].text;
+            } catch (e) {
+                return 'No se pudo generar la interpretación automática.';
+            }
+        }
+
+        // Función para mostrar la descripción IA debajo del gráfico, soportando Markdown básico y evitando negrita en números
+        function mostrarDescripcionIA(chartId, texto) {
+            let descDiv = document.getElementById(chartId + '-desc');
+            if (!descDiv) {
+                const card = document.getElementById(chartId + 'Chart').parentElement;
+                descDiv = document.createElement('div');
+                descDiv.id = chartId + '-desc';
+                descDiv.className = 'desc-ia';
+                card.appendChild(descDiv);
+            }
+            // Reemplazo de Markdown a HTML para negritas, pero solo si no es un número
+            let html = texto.replace(/\*\*(.*?)\*\*/g, (match, p1) => {
+                if (/^[0-9.,\s]+$/.test(p1)) return p1; // Si solo es número, no negrita
+                return `<strong>${p1}</strong>`;
+            }).replace(/\n/g, '<br>');
+            descDiv.innerHTML = `<strong>Interpretación IA:</strong><br>${html}`;
+        }
+
+        // Funciones auxiliares para actualizar cada gráfico
+        async function actualizarGraficoCalidad(respuestas) {
+            destroyChart('calidad');
+            const ctx = document.getElementById('calidadChart').getContext('2d');
+            const stats = calcularEstadisticas(respuestas, ['calidad_1', 'calidad_2']);
+            const dataArr = calcularDistribucion(respuestas, ['calidad_1', 'calidad_2']);
+            const data = {
+                labels: ['1', '2', '3', '4', '5'],
+                datasets: [{
+                    label: 'Calidad de recomendación',
+                    data: dataArr,
+                    backgroundColor: getBarGradient(ctx, graficoColores['calidad'].grad),
+                    borderColor: graficoColores['calidad'].border,
+                    borderWidth: 1,
+                    borderRadius: 12
+                }]
+            };
+            setEstadisticasTitulo('calidad', stats);
+            charts.calidad = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: getChartOptions(stats, respuestas, 'Calidad de recomendación')
+            });
+            mostrarDescripcionIA('calidad', 'Generando interpretación automática...');
+            const desc = await generarDescripcionIA('Calidad de recomendación', dataArr, stats.total, data.labels);
+            mostrarDescripcionIA('calidad', desc);
+        }
+
+        // Función para actualizar gráfico de personalización
+        async function actualizarGraficoPersonalizacion(respuestas) {
+            destroyChart('personalizacion');
+            const ctx = document.getElementById('personalizacionChart').getContext('2d');
+            const stats = calcularEstadisticas(respuestas, ['personal_1', 'personal_2']);
+            const dataArr = calcularDistribucion(respuestas, ['personal_1', 'personal_2']);
+            const data = {
+                labels: ['1', '2', '3', '4', '5'],
+                datasets: [{
+                    label: 'Personalización percibida',
+                    data: dataArr,
+                    backgroundColor: getBarGradient(ctx, graficoColores['personalizacion'].grad),
+                    borderColor: graficoColores['personalizacion'].border,
+                    borderWidth: 1,
+                    borderRadius: 12
+                }]
+            };
+            setEstadisticasTitulo('personalizacion', stats);
+            charts.personalizacion = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: getChartOptions(stats, respuestas, 'Personalización percibida')
+            });
+            mostrarDescripcionIA('personalizacion', 'Generando interpretación automática...');
+            const desc = await generarDescripcionIA('Personalización percibida', dataArr, stats.total, data.labels);
+            mostrarDescripcionIA('personalizacion', desc);
+        }
+
+        // Función para actualizar gráfico de diversidad
+        async function actualizarGraficoDiversidad(respuestas) {
+            destroyChart('diversidad');
+            const ctx = document.getElementById('diversidadChart').getContext('2d');
+            const stats = calcularEstadisticas(respuestas, ['diversidad_1', 'diversidad_2']);
+            const dataArr = calcularDistribucion(respuestas, ['diversidad_1', 'diversidad_2']);
+            const data = {
+                labels: ['1', '2', '3', '4', '5'],
+                datasets: [{
+                    label: 'Diversidad de recomendaciones',
+                    data: dataArr,
+                    backgroundColor: getBarGradient(ctx, graficoColores['diversidad'].grad),
+                    borderColor: graficoColores['diversidad'].border,
+                    borderWidth: 1,
+                    borderRadius: 12
+                }]
+            };
+            setEstadisticasTitulo('diversidad', stats);
+            charts.diversidad = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: getChartOptions(stats, respuestas, 'Diversidad de recomendaciones')
+            });
+            mostrarDescripcionIA('diversidad', 'Generando interpretación automática...');
+            const desc = await generarDescripcionIA('Diversidad de recomendaciones', dataArr, stats.total, data.labels);
+            mostrarDescripcionIA('diversidad', desc);
+        }
+
+        // Función para actualizar gráfico de IA
+        async function actualizarGraficoIA(respuestas) {
+            destroyChart('ia');
+            const ctx = document.getElementById('iaChart').getContext('2d');
+            const stats = calcularEstadisticas(respuestas, ['ia_1', 'ia_2', 'ia_3']);
+            const dataArr = calcularDistribucion(respuestas, ['ia_1', 'ia_2', 'ia_3']);
+            const data = {
+                labels: ['1', '2', '3', '4', '5'],
+                datasets: [{
+                    label: 'Inteligencia Artificial',
+                    data: dataArr,
+                    backgroundColor: getBarGradient(ctx, graficoColores['ia'].grad),
+                    borderColor: graficoColores['ia'].border,
+                    borderWidth: 1,
+                    borderRadius: 12
+                }]
+            };
+            setEstadisticasTitulo('ia', stats);
+            charts.ia = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: getChartOptions(stats, respuestas, 'Inteligencia Artificial')
+            });
+            mostrarDescripcionIA('ia', 'Generando interpretación automática...');
+            const desc = await generarDescripcionIA('Inteligencia Artificial', dataArr, stats.total, data.labels);
+            mostrarDescripcionIA('ia', desc);
+        }
+
+        // Función para actualizar gráfico de indexación
+        async function actualizarGraficoIndexacion(respuestas) {
+            destroyChart('indexacion');
+            const ctx = document.getElementById('indexacionChart').getContext('2d');
+            const stats = calcularEstadisticas(respuestas, ['indexacion_1', 'indexacion_2', 'indexacion_3']);
+            const dataArr = calcularDistribucion(respuestas, ['indexacion_1', 'indexacion_2', 'indexacion_3']);
+            const data = {
+                labels: ['1', '2', '3', '4', '5'],
+                datasets: [{
+                    label: 'Indexación de datos',
+                    data: dataArr,
+                    backgroundColor: getBarGradient(ctx, graficoColores['indexacion'].grad),
+                    borderColor: graficoColores['indexacion'].border,
+                    borderWidth: 1,
+                    borderRadius: 12
+                }]
+            };
+            setEstadisticasTitulo('indexacion', stats);
+            charts.indexacion = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: getChartOptions(stats, respuestas, 'Indexación de datos')
+            });
+            mostrarDescripcionIA('indexacion', 'Generando interpretación automática...');
+            const desc = await generarDescripcionIA('Indexación de datos', dataArr, stats.total, data.labels);
+            mostrarDescripcionIA('indexacion', desc);
+        }
+
+        // Función para actualizar gráfico de usabilidad
+        async function actualizarGraficoUsabilidad(respuestas) {
+            destroyChart('usabilidad');
+            const ctx = document.getElementById('usabilidadChart').getContext('2d');
+            const stats = calcularEstadisticas(respuestas, ['usabilidad_1', 'usabilidad_2']);
+            const dataArr = calcularDistribucion(respuestas, ['usabilidad_1', 'usabilidad_2']);
+            const data = {
+                labels: ['1', '2', '3', '4', '5'],
+                datasets: [{
+                    label: 'Usabilidad',
+                    data: dataArr,
+                    backgroundColor: getBarGradient(ctx, graficoColores['usabilidad'].grad),
+                    borderColor: graficoColores['usabilidad'].border,
+                    borderWidth: 1,
+                    borderRadius: 12
+                }]
+            };
+            setEstadisticasTitulo('usabilidad', stats);
+            charts.usabilidad = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: getChartOptions(stats, respuestas, 'Usabilidad')
+            });
+            mostrarDescripcionIA('usabilidad', 'Generando interpretación automática...');
+            const desc = await generarDescripcionIA('Usabilidad', dataArr, stats.total, data.labels);
+            mostrarDescripcionIA('usabilidad', desc);
+        }
+
+        // Función para actualizar gráfico de satisfacción
+        async function actualizarGraficoSatisfaccion(respuestas) {
+            destroyChart('satisfaccion');
+            const ctx = document.getElementById('satisfaccionChart').getContext('2d');
+            const stats = calcularEstadisticas(respuestas, ['satisfaccion_1', 'satisfaccion_2']);
+            const dataArr = calcularDistribucion(respuestas, ['satisfaccion_1', 'satisfaccion_2']);
+            const data = {
+                labels: ['1', '2', '3', '4', '5'],
+                datasets: [{
+                    label: 'Satisfacción',
+                    data: dataArr,
+                    backgroundColor: getBarGradient(ctx, graficoColores['satisfaccion'].grad),
+                    borderColor: graficoColores['satisfaccion'].border,
+                    borderWidth: 1,
+                    borderRadius: 12
+                }]
+            };
+            setEstadisticasTitulo('satisfaccion', stats);
+            charts.satisfaccion = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: getChartOptions(stats, respuestas, 'Satisfacción')
+            });
+            mostrarDescripcionIA('satisfaccion', 'Generando interpretación automática...');
+            const desc = await generarDescripcionIA('Satisfacción', dataArr, stats.total, data.labels);
+            mostrarDescripcionIA('satisfaccion', desc);
+        }
+
+        // Función para actualizar gráfico de fidelización
+        async function actualizarGraficoFidelizacion(respuestas) {
+            destroyChart('fidelizacion');
+            const ctx = document.getElementById('fidelizacionChart').getContext('2d');
+            const stats = calcularEstadisticas(respuestas, ['fidelizacion_1', 'fidelizacion_2']);
+            const dataArr = calcularDistribucion(respuestas, ['fidelizacion_1', 'fidelizacion_2']);
+            const data = {
+                labels: ['1', '2', '3', '4', '5'],
+                datasets: [{
+                    label: 'Fidelización',
+                    data: dataArr,
+                    backgroundColor: getBarGradient(ctx, graficoColores['fidelizacion'].grad),
+                    borderColor: graficoColores['fidelizacion'].border,
+                    borderWidth: 1,
+                    borderRadius: 12
+                }]
+            };
+            setEstadisticasTitulo('fidelizacion', stats);
+            charts.fidelizacion = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: getChartOptions(stats, respuestas, 'Fidelización')
+            });
+            mostrarDescripcionIA('fidelizacion', 'Generando interpretación automática...');
+            const desc = await generarDescripcionIA('Fidelización', dataArr, stats.total, data.labels);
+            mostrarDescripcionIA('fidelizacion', desc);
+        }
+
+        // Función para actualizar gráfico demográfico
+        function actualizarGraficoDemograficos(respuestas) {
+            destroyChart('demograficos');
+            const ctx = document.getElementById('demograficosChart').getContext('2d');
+            
+            // Procesar datos demográficos
+            const datosDemograficos = {
+                sexo: {},
+                edad: {},
+                educacion: {},
+                frecuencia_compra: {}
+            };
+
+            respuestas.forEach(r => {
+                ['sexo', 'edad', 'educacion', 'frecuencia_compra'].forEach(campo => {
+                    if (r[campo]) {
+                        datosDemograficos[campo][r[campo]] = (datosDemograficos[campo][r[campo]] || 0) + 1;
+                    }
+                });
+            });
+
+            // Paleta de colores vivos diferenciados
+            const coloresVivos = [
+                '#60a5fa', // azul
+                '#f472b6', // rosa
+                '#34d399', // verde
+                '#fbbf24', // amarillo
+                '#a78bfa', // violeta
+                '#f87171', // rojo
+                '#38bdf8', // celeste
+                '#facc15', // dorado
+                '#fb7185', // rosado fuerte
+                '#4ade80'  // verde claro
+            ];
+
+            // Usar sexo como ejemplo principal (puedes cambiar a otro campo si prefieres)
+            const labels = Object.keys(datosDemograficos.sexo);
+            const values = Object.values(datosDemograficos.sexo);
+            const backgroundColors = labels.map((_, i) => coloresVivos[i % coloresVivos.length]);
+
+            const data = {
+                labels: labels,
+                datasets: [{
+                    label: 'Distribución demográfica',
+                    data: values,
+                    backgroundColor: backgroundColors,
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            };
+
+            setEstadisticasTitulo('demograficos', { media: 0, desviacion: 0, moda: 0, total: 0 });
+            charts.demograficos = new Chart(ctx, {
+                type: 'pie',
+                data: data,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#1e293b',
+                                font: { size: 15, weight: 'bold' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#2563eb',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: '#1e293b',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const percentage = ((value / values.reduce((a,b)=>a+b,0)) * 100).toFixed(1);
+                                    return `${context.label}: ${value} respuestas (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1200,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+
+        // Agregar event listeners para actualizar gráficos
+        document.querySelectorAll('input[type="radio"]').forEach(input => {
+            input.addEventListener('change', actualizarGraficos);
+        });
+
+        document.querySelectorAll('select').forEach(select => {
+            select.addEventListener('change', () => {
+                actualizarGraficos();
+            });
+        });
+
+        // Inicializar gráficos al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            actualizarGraficos();
+        });
+
+        // Mejora de opciones de gráficos para todos los gráficos de dimensiones
+        function getChartOptions(stats, respuestas, label) {
+            return {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            color: '#1e293b',
+                            font: { size: 14, weight: 'bold' }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#2563eb',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: '#1e293b',
+                        borderWidth: 1,
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.raw;
+                                const percentage = ((value / stats.total) * 100).toFixed(1);
+                                return `${value} respuestas (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1200,
+                    easing: 'easeOutQuart'
+                },
+                layout: {
+                    padding: { top: 30, right: 20, bottom: 10, left: 20 }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: respuestas.length,
+                        title: {
+                            display: true,
+                            text: 'Número de respuestas',
+                            color: '#2563eb',
+                            font: { size: 15, weight: 'bold' }
+                        },
+                        grid: {
+                            color: '#e3eafc',
+                            borderDash: [4, 4]
+                        },
+                        ticks: { color: '#1e293b', font: { size: 13 } }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Escala Likert',
+                            color: '#2563eb',
+                            font: { size: 15, weight: 'bold' }
+                        },
+                        grid: {
+                            color: '#f3f6fb',
+                            borderDash: [2, 2]
+                        },
+                        ticks: { color: '#1e293b', font: { size: 13 } }
+                    }
+                }
+            };
+        }
+
+        function setEstadisticasTitulo(chartId, stats) {
+            let canvas = document.getElementById(chartId + 'Chart');
+            let parent = canvas.parentElement;
+            let oldTitle = parent.querySelector('.chart-stats-title');
+            if (oldTitle) oldTitle.remove();
+            let div = document.createElement('div');
+            div.className = 'chart-stats-title';
+            div.style.cssText = 'color:#2563eb;font-size:1.1rem;font-weight:700;margin-bottom:0.2rem;text-align:center;';
+            div.innerText = `Estadísticas: Media = ${stats.media}, Desviación = ${stats.desviacion}, Moda = ${stats.moda}`;
+            parent.insertBefore(div, canvas);
+        }
+
+        // Mejora visual de los gráficos: tamaño, colores, bordes, animación
+        const graficoCards = document.querySelectorAll('.grafico-card');
+        graficoCards.forEach(card => {
+            card.style.background = '#fff';
+            card.style.boxShadow = '0 4px 16px rgba(44,62,80,0.13)';
+            card.style.padding = '2.2rem 1.5rem 2.5rem 1.5rem';
+            card.style.borderRadius = '18px';
+            card.style.display = 'flex';
+            card.style.flexDirection = 'column';
+            card.style.alignItems = 'center';
+            card.style.justifyContent = 'center';
+        });
+        const allCanvases = document.querySelectorAll('.grafico-card canvas');
+        allCanvases.forEach(c => { c.width = 420; c.height = 260; c.style.maxWidth = '100%'; c.style.maxHeight = '100%'; });
+
+        // Colores vivos y degradados para cada gráfico
+        const graficoColores = {
+            calidad:    { bg: 'rgba(54,162,235,0.25)', border: 'rgba(54,162,235,1)', grad: ['#60a5fa','#2563eb'] },
+            personalizacion: { bg: 'rgba(255,99,132,0.18)', border: 'rgba(255,99,132,1)', grad: ['#fca5a5','#be185d'] },
+            diversidad: { bg: 'rgba(34,197,94,0.18)', border: 'rgba(34,197,94,1)', grad: ['#6ee7b7','#059669'] },
+            ia:         { bg: 'rgba(168,85,247,0.18)', border: 'rgba(168,85,247,1)', grad: ['#c4b5fd','#7c3aed'] },
+            indexacion: { bg: 'rgba(251,191,36,0.18)', border: 'rgba(251,191,36,1)', grad: ['#fde68a','#f59e42'] },
+            usabilidad: { bg: 'rgba(251,146,60,0.18)', border: 'rgba(251,146,60,1)', grad: ['#fdba74','#ea580c'] },
+            satisfaccion: { bg: 'rgba(59,130,246,0.18)', border: 'rgba(59,130,246,1)', grad: ['#93c5fd','#1d4ed8'] },
+            fidelizacion: { bg: 'rgba(244,63,94,0.18)', border: 'rgba(244,63,94,1)', grad: ['#fda4af','#be123c'] },
+            demograficos: { bg: 'rgba(16,185,129,0.18)', border: 'rgba(16,185,129,1)', grad: ['#6ee7b7','#059669'] }
+        };
+
+        // En cada función de gráfico, usa los colores y gradientes personalizados
+        // Ejemplo para calidad:
+        // const color = graficoColores['calidad'];
+        // backgroundColor: getBarGradient(ctx, color.grad), borderColor: color.border
+        function getBarGradient(ctx, gradColors) {
+            const gradient = ctx.createLinearGradient(0, 0, 0, 260);
+            gradient.addColorStop(0, gradColors[0]);
+            gradient.addColorStop(1, gradColors[1]);
+            return gradient;
+        }
+    </script>
+
+    <!-- Scripts -->
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/navbar-loader.js"></script>
+</body>
+</html> 

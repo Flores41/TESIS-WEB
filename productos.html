@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos - Shop.co</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Barra de promoción -->
+    <div class="promo-bar">
+        <p>Regístrate y obtén 20% de descuento en tu primer pedido. <a href="#" class="sign-up-link">Regístrate Ahora</a></p>
+        <button class="close-button">×</button>
+    </div>
+
+    <!-- Contenedor para el navbar reutilizable -->
+    <div class="navbar-container"></div>
+
+    <div class="productos-container">
+        <h2 id="titulo-categoria">Productos</h2>
+        
+        <div class="productos-layout">
+            <!-- Sidebar de filtros -->
+            <aside class="filtros-sidebar">
+                <div class="filtro-header">
+                    <h3>Filtros</h3>
+                    <button id="limpiar-filtros" class="btn-limpiar">Limpiar filtros</button>
+                </div>
+
+                <!-- Filtro de Color -->
+                <div class="filtro-seccion">
+                    <h4>Color</h4>
+                    <div class="color-grid" id="filtro-colores">
+                        <!-- Los colores se cargarán dinámicamente -->
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Contenido principal -->
+            <main class="productos-main">
+                <div class="productos-header">
+                    <div class="productos-count" id="productos-count">0 productos encontrados</div>
+                    <div class="productos-sort">
+                        <select id="ordenamiento" class="select-ordenar">
+                            <option value="">Ordenar por</option>
+                            <option value="precio-asc">Precio: Menor a Mayor</option>
+                            <option value="precio-desc">Precio: Mayor a Menor</option>
+                            <option value="nombre-asc">Nombre: A-Z</option>
+                            <option value="nombre-desc">Nombre: Z-A</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="loading" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <span>Cargando productos...</span>
+                </div>
+                <div id="error" style="display: none;"></div>
+                <div class="productos-grid" id="productos-grid">
+                    <!-- Los productos se cargarán aquí dinámicamente -->
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-top">
+            <div class="footer-logo">SHOP.CO</div>
+            <p class="footer-description">
+                Tu destino de moda favorito con las últimas tendencias y los mejores precios.
+            </p>
+            <div class="social-links">
+                <a href="#" class="social-link">Twitter</a>
+                <a href="#" class="social-link">Facebook</a>
+                <a href="#" class="social-link">Instagram</a>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { db, auth, verificarFavorito, toggleFavorito } from './js/firebase-config.js';
+        import { collection, getDocs, query, where, doc, getDoc, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        let todosLosProductos = [];
+        let filtrosActivos = {
+            colores: new Set(),
+            ordenamiento: ''
+        };
+
+        // Cache para productos
+        const CACHE_KEY = 'productos_cache';
+        const CACHE_EXPIRY = 1000 * 60 * 5; // 5 minutos
+
+        // Función para guardar en caché
+        function guardarEnCache(key, data) {
+            const cacheData = {
+                timestamp: Date.now(),
+                data: data
+            };
+            localStorage.setItem(key, JSON.stringify(cacheData));
+        }
+
+        // Función para obtener del caché
+        function obtenerDeCache(key) {
+            const cached = localStorage.getItem(key);
+            if (!cached) return null;
+
+            const { timestamp, data } = JSON.parse(cached);
+            if (Date.now() - timestamp > CACHE_EXPIRY) {
+                localStorage.removeItem(key);
+                return null;
+            }
+            return data;
+        }
+
+        // Obtener parámetros de la URL
+        const params = new URLSearchParams(window.location.search);
+        const genero = params.get('genero');
+        const categoria = params.get('categoria');
+
+        // Actualizar el título
+        const tituloCategoriaElement = document.getElementById('titulo-categoria');
+        if (categoria) {
+            const categoriaCapitalizada = categoria.charAt(0).toUpperCase() + categoria.slice(1);
+            tituloCategoriaElement.textContent = `${categoriaCapitalizada} - ${genero.charAt(0).toUpperCase() + genero.slice(1)}`;
+        }
+
+        // Función para inicializar filtros de color
+        function inicializarFiltrosColor(productos) {
+            const coloresUnicos = new Set();
+            productos.forEach(producto => {
+                if (producto.color) {
+                    coloresUnicos.add(producto.color.toLowerCase());
+                }
+            });
+
+            const filtroColores = document.getElementById('filtro-colores');
+            filtroColores.innerHTML = '';
+
+            coloresUnicos.forEach(color => {
+                const colorBtn = document.createElement('button');
+                colorBtn.className = 'color-btn';
+                colorBtn.style.backgroundColor = color;
+                colorBtn.setAttribute('data-color', color);
+                colorBtn.title = color.charAt(0).toUpperCase() + color.slice(1);
+
+                colorBtn.addEventListener('click', () => {
+                    colorBtn.classList.toggle('selected');
+                    if (colorBtn.classList.contains('selected')) {
+                        filtrosActivos.colores.add(color);
+                    } else {
+                        filtrosActivos.colores.delete(color);
+                    }
+                    aplicarFiltros();
+                });
+
+                filtroColores.appendChild(colorBtn);
+            });
+        }
+
+        // Event Listeners para filtros
+        document.getElementById('ordenamiento').addEventListener('change', (e) => {
+            filtrosActivos.ordenamiento = e.target.value;
+            aplicarFiltros();
+        });
+
+        document.getElementById('limpiar-filtros').addEventListener('click', () => {
+            // Resetear filtros
+            filtrosActivos = {
+                colores: new Set(),
+                ordenamiento: ''
+            };
+
+            // Resetear UI
+            document.getElementById('ordenamiento').value = '';
+            document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('selected'));
+
+            aplicarFiltros();
+        });
+
+        // Función para aplicar filtros
+        function aplicarFiltros() {
+            let productosFiltrados = [...todosLosProductos];
+
+            // Filtrar por color
+            if (filtrosActivos.colores.size > 0) {
+                productosFiltrados = productosFiltrados.filter(producto => 
+                    producto.color && filtrosActivos.colores.has(producto.color.toLowerCase())
+                );
+            }
+
+            // Aplicar ordenamiento
+            if (filtrosActivos.ordenamiento) {
+                switch(filtrosActivos.ordenamiento) {
+                    case 'precio-asc':
+                        productosFiltrados.sort((a, b) => {
+                            const precioA = parseFloat(a.precio.replace(/[^0-9.]/g, ''));
+                            const precioB = parseFloat(b.precio.replace(/[^0-9.]/g, ''));
+                            return precioA - precioB;
+                        });
+                        break;
+                    case 'precio-desc':
+                        productosFiltrados.sort((a, b) => {
+                            const precioA = parseFloat(a.precio.replace(/[^0-9.]/g, ''));
+                            const precioB = parseFloat(b.precio.replace(/[^0-9.]/g, ''));
+                            return precioB - precioA;
+                        });
+                        break;
+                    case 'nombre-asc':
+                        productosFiltrados.sort((a, b) => a.nombre.localeCompare(b.nombre));
+                        break;
+                    case 'nombre-desc':
+                        productosFiltrados.sort((a, b) => b.nombre.localeCompare(a.nombre));
+                        break;
+                }
+            }
+
+            // Actualizar contador de productos
+            document.getElementById('productos-count').textContent = 
+                `${productosFiltrados.length} productos encontrados`;
+
+            // Mostrar productos filtrados
+            mostrarProductos(productosFiltrados);
+        }
+
+        // Función para mostrar productos
+        function mostrarProductos(productos) {
+            console.log(`📋 Mostrando ${productos.length} productos en la grilla`);
+            const productosGrid = document.getElementById('productos-grid');
+            productosGrid.innerHTML = '';
+
+            productos.forEach(async (producto) => {
+                const productoElement = document.createElement('div');
+                productoElement.className = 'producto-card';
+                productoElement.dataset.productId = producto.id;
+                
+                // Calcular descuento si existe precio anterior
+                let descuentoHtml = '';
+                if (producto.precioAntes) {
+                    const precioActual = parseFloat(producto.precio.replace(/[^0-9.]/g, ''));
+                    const precioAnterior = parseFloat(producto.precioAntes.replace(/[^0-9.]/g, ''));
+                    const descuento = Math.round(((precioAnterior - precioActual) / precioAnterior) * 100);
+                    if (descuento > 0) {
+                        descuentoHtml = `<div class="descuento-badge">-${descuento}%</div>`;
+                    }
+                }
+
+                // Hacer que toda la tarjeta sea clickeable
+                productoElement.style.cursor = 'pointer';
+                productoElement.onclick = () => {
+                    const coleccion = genero === 'hombre' ? 'shombre' : 'smujer';
+                    window.location.href = `producto-detalle.html?id=${producto.id}&coleccion=${coleccion}`;
+                };
+
+                // Verificar si el producto está en favoritos
+                const esFavorito = await verificarFavorito(producto.id);
+                const btnClass = esFavorito ? 'btn-agregar activo' : 'btn-agregar';
+                const btnText = esFavorito ? 'Quitar de favoritos' : 'Agregar a favoritos';
+                const corazon = esFavorito ? '♥' : '♡';
+
+                productoElement.innerHTML = `
+                    ${descuentoHtml}
+                    <div class="producto-imagen">
+                        <img src="${producto.imagen}" alt="${producto.nombre}">
+                        <div class="producto-overlay">
+                            <button class="${btnClass}" onclick="event.stopPropagation(); handleFavorito('${producto.id}', this, '${producto.nombre}')">
+                                <span class="icono-corazon">${corazon}</span>
+                                <span class="btn-text">${btnText}</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="producto-info">
+                        <h3>${producto.nombre}</h3>
+                        <div class="precios-container">
+                            <p class="precio-actual">${producto.precio}</p>
+                            ${producto.precioAntes ? `<p class="precio-antes">${producto.precioAntes}</p>` : ''}
+                        </div>
+                    </div>
+                    <div class="notificacion-favorito">
+                        <span class="mensaje"></span>
+                    </div>
+                `;
+                productosGrid.appendChild(productoElement);
+            });
+        }
+
+        // Función para manejar la interacción con favoritos
+        async function handleFavorito(productoId, btnElement, nombreProducto) {
+            if (!auth.currentUser) {
+                alert('Debes iniciar sesión para agregar productos a favoritos');
+                return;
+            }
+
+            try {
+                const card = btnElement.closest('.producto-card');
+                const notificacion = card.querySelector('.notificacion-favorito');
+                const mensaje = notificacion.querySelector('.mensaje');
+                const iconoCorazon = btnElement.querySelector('.icono-corazon');
+                const btnTexto = btnElement.querySelector('.btn-text');
+
+                // Agregar clase de animación al botón
+                btnElement.classList.add('pulsando');
+
+                const esFavorito = btnElement.classList.contains('activo');
+                const resultado = await toggleFavorito(productoId);
+
+                if (resultado !== esFavorito) { // Si el estado cambió exitosamente
+                    btnElement.classList.toggle('activo');
+                    
+                    if (btnElement.classList.contains('activo')) {
+                        iconoCorazon.textContent = '♥';
+                        btnTexto.textContent = 'Quitar de favoritos';
+                        mensaje.textContent = `¡${nombreProducto} agregado a favoritos!`;
+                        mensaje.style.backgroundColor = '#4CAF50';
+                    } else {
+                        iconoCorazon.textContent = '♡';
+                        btnTexto.textContent = 'Agregar a favoritos';
+                        mensaje.textContent = `${nombreProducto} eliminado de favoritos`;
+                        mensaje.style.backgroundColor = '#FF5252';
+                    }
+
+                    // Mostrar notificación
+                    notificacion.style.display = 'block';
+                    notificacion.classList.add('mostrar');
+
+                    // Ocultar notificación después de 2 segundos
+                    setTimeout(() => {
+                        notificacion.classList.remove('mostrar');
+                        setTimeout(() => {
+                            notificacion.style.display = 'none';
+                        }, 300);
+                    }, 2000);
+                }
+
+                // Quitar clase de animación después de un momento
+                setTimeout(() => {
+                    btnElement.classList.remove('pulsando');
+                }, 300);
+
+            } catch (error) {
+                console.error('Error al gestionar favorito:', error);
+                alert('Error al gestionar favoritos. Por favor, intenta de nuevo.');
+            }
+        }
+
+        // Hacer la función handleFavorito disponible globalmente
+        window.handleFavorito = handleFavorito;
+
+        // Agregar estilos necesarios
+        const styles = document.createElement('style');
+        styles.textContent = `
+            .btn-agregar {
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 10px 20px;
+                border-radius: 25px;
+                border: none;
+                background-color: white;
+                color: #333;
+                cursor: pointer;
+                font-weight: 500;
+            }
+
+            .btn-agregar.activo {
+                background-color: #FF4B4B;
+                color: white;
+            }
+
+            .btn-agregar.pulsando {
+                transform: scale(0.95);
+            }
+
+            .icono-corazon {
+                font-size: 1.2em;
+                transition: transform 0.3s ease;
+            }
+
+            .btn-agregar:hover .icono-corazon {
+                transform: scale(1.2);
+            }
+
+            .notificacion-favorito {
+                display: none;
+                position: absolute;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%) translateY(20px);
+                opacity: 0;
+                transition: all 0.3s ease;
+                z-index: 1000;
+            }
+
+            .notificacion-favorito.mostrar {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+
+            .notificacion-favorito .mensaje {
+                padding: 8px 16px;
+                border-radius: 20px;
+                color: white;
+                font-size: 14px;
+                white-space: nowrap;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            }
+
+            .producto-card {
+                position: relative;
+            }
+        `;
+        document.head.appendChild(styles);
+
+        // Función para cargar productos
+        async function cargarProductos() {
+            const loadingElement = document.getElementById('loading');
+            const errorElement = document.getElementById('error');
+
+            try {
+                loadingElement.style.display = 'flex';
+                errorElement.style.display = 'none';
+
+                console.log('🔍 Cargando productos para:', { genero, categoria });
+
+                // Intentar obtener productos del caché
+                const cacheKey = `${CACHE_KEY}_${genero}_${categoria}`;
+                const productosCache = obtenerDeCache(cacheKey);
+
+                if (productosCache) {
+                    console.log('📦 Productos obtenidos del caché');
+                    todosLosProductos = productosCache;
+                    inicializarFiltrosColor(todosLosProductos);
+                    aplicarFiltros();
+                    loadingElement.style.display = 'none';
+                    return;
+                }
+
+                const coleccion = genero === 'hombre' ? 'shombre' : 'smujer';
+                console.log('🔄 Consultando colección:', coleccion);
+                
+                const productosRef = collection(db, coleccion);
+                const q = query(productosRef, where("categoria", "==", categoria));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    console.log('⚠️ No se encontraron productos en esta categoría');
+                    errorElement.textContent = 'No se encontraron productos en esta categoría.';
+                    errorElement.style.display = 'block';
+                    return;
+                }
+
+                todosLosProductos = [];
+                querySnapshot.forEach((doc) => {
+                    const producto = doc.data();
+                    todosLosProductos.push(producto);
+                });
+
+                console.log(`✅ Se encontraron ${todosLosProductos.length} productos`);
+
+                // Guardar en caché
+                guardarEnCache(cacheKey, todosLosProductos);
+                console.log('💾 Productos guardados en caché');
+
+                // Inicializar filtros
+                inicializarFiltrosColor(todosLosProductos);
+                
+                // Mostrar todos los productos inicialmente
+                aplicarFiltros();
+
+            } catch (error) {
+                console.error("❌ Error al cargar los productos:", error);
+                errorElement.textContent = 'Error al cargar los productos. Por favor, intenta de nuevo más tarde.';
+                errorElement.style.display = 'block';
+            } finally {
+                loadingElement.style.display = 'none';
+            }
+        }
+
+        // Event listener para clicks en productos
+        document.getElementById('productos-grid').addEventListener('click', async (e) => {
+            const productoCard = e.target.closest('.producto-card');
+            if (productoCard) {
+                const producto = todosLosProductos.find(p => p.id === productoCard.dataset.productId);
+                if (producto) {
+                    console.log('👆 Click en producto:', {
+                        id: producto.id,
+                        nombre: producto.nombre,
+                        categoria: producto.categoria
+                    });
+                    
+                    // Registrar vista del producto
+                    try {
+                        console.log('📊 Registrando interacción con producto...');
+                        await trackProductView({
+                            product_id: producto.id,
+                            product_name: producto.nombre,
+                            product_category: producto.categoria
+                        });
+                        console.log('✅ Interacción registrada correctamente');
+                    } catch (error) {
+                        console.error('❌ Error al registrar interacción:', error);
+                    }
+                }
+            }
+        });
+
+        // Cargar productos cuando la página esté lista
+        document.addEventListener('DOMContentLoaded', cargarProductos);
+    </script>
+
+    <!-- Scripts -->
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/navbar-loader.js"></script>
+</body>
+</html> 

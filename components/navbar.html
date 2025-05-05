@@ -1,0 +1,146 @@
+<!-- Navbar -->
+<nav class="main-nav">
+    <div class="nav-container">
+        <a href="index.html" class="logo">SHOP.CO</a>
+        <div class="nav-links">
+            <div class="dropdown">
+                <a href="#" class="nav-link">Hombre</a>
+                <div class="dropdown-content" id="menu-hombre">
+                    <!-- Las categorías de hombre se cargarán dinámicamente aquí -->
+                </div>
+            </div>
+            <div class="dropdown">
+                <a href="#" class="nav-link">Mujer</a>
+                <div class="dropdown-content" id="menu-mujer">
+                    <!-- Las categorías de mujer se cargarán dinámicamente aquí -->
+                </div>
+            </div>
+            <a href="#" class="nav-link">Infantil</a>
+            <a href="#" class="nav-link">Denim</a>
+        </div>
+        <div class="search-bar">
+            <input type="search" placeholder="Buscar productos...">
+        </div>
+        <div class="nav-icons">
+            <a href="favoritos.html" class="favorites-icon" title="Mis Favoritos">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                <span class="favorites-count" style="display: none;">0</span>
+            </a>
+            <a href="#" class="cart-icon">🛒</a>
+            <a href="#" class="account-icon">👤</a>
+        </div>
+    </div>
+</nav>
+
+<style>
+.nav-icons {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.favorites-icon {
+    position: relative;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+.favorites-icon:hover {
+    color: #FF4B4B;
+}
+
+.favorites-icon svg {
+    width: 24px;
+    height: 24px;
+    transition: transform 0.3s ease;
+}
+
+.favorites-icon:hover svg {
+    transform: scale(1.1);
+}
+
+.favorites-count {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: #FF4B4B;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+}
+
+.favorites-icon.active svg {
+    fill: #FF4B4B;
+    stroke: #FF4B4B;
+}
+</style>
+
+<script type="module">
+import { db, auth } from './js/firebase-config.js';
+import { collection, getDocs, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+// Función para actualizar el contador de favoritos
+function setupFavoritesCounter(userId) {
+    const countElement = document.querySelector('.favorites-count');
+    if (!countElement) return;
+
+    try {
+        // Crear una consulta simple por userId
+        const favoritosRef = collection(db, 'favoritos');
+        const q = query(favoritosRef, where("userId", "==", userId));
+
+        // Usar onSnapshot para escuchar cambios en tiempo real
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const count = snapshot.size;
+            if (count > 0) {
+                countElement.textContent = count;
+                countElement.style.display = 'flex';
+            } else {
+                countElement.style.display = 'none';
+            }
+        }, (error) => {
+            console.error("Error al escuchar cambios en favoritos:", error);
+            countElement.style.display = 'none';
+        });
+
+        // Retornar la función para dejar de escuchar
+        return unsubscribe;
+    } catch (error) {
+        console.error('Error al configurar el contador de favoritos:', error);
+        countElement.style.display = 'none';
+    }
+}
+
+// Variable para almacenar la función de cancelación de la suscripción
+let unsubscribeFavorites = null;
+
+// Observar cambios en la autenticación
+onAuthStateChanged(auth, (user) => {
+    // Si había una suscripción anterior, cancelarla
+    if (unsubscribeFavorites) {
+        unsubscribeFavorites();
+        unsubscribeFavorites = null;
+    }
+
+    // Si hay un usuario autenticado, configurar el contador
+    if (user) {
+        unsubscribeFavorites = setupFavoritesCounter(user.uid);
+    } else {
+        // Si no hay usuario, ocultar el contador
+        const countElement = document.querySelector('.favorites-count');
+        if (countElement) {
+            countElement.style.display = 'none';
+        }
+    }
+});
+</script> 

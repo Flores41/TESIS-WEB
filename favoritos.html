@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Favoritos - Shop.co</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Barra de promoción -->
+    <div class="promo-bar">
+        <p>Regístrate y obtén 20% de descuento en tu primer pedido. <a href="#" class="sign-up-link">Regístrate Ahora</a></p>
+        <button class="close-button">×</button>
+    </div>
+
+    <!-- Contenedor para el navbar reutilizable -->
+    <div class="navbar-container"></div>
+
+    <div class="productos-container">
+        <h2 id="titulo-favoritos">Mis Favoritos</h2>
+        
+        <div class="productos-layout">
+            <!-- Contenido principal -->
+            <main class="productos-main">
+                <div class="productos-header">
+                    <div class="productos-count" id="productos-count">0 productos favoritos</div>
+                    <div class="productos-sort">
+                        <select id="ordenamiento" class="select-ordenar">
+                            <option value="">Ordenar por</option>
+                            <option value="precio-asc">Precio: Menor a Mayor</option>
+                            <option value="precio-desc">Precio: Mayor a Menor</option>
+                            <option value="nombre-asc">Nombre: A-Z</option>
+                            <option value="nombre-desc">Nombre: Z-A</option>
+                            <option value="fecha-desc">Más recientes</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="loading" style="display: flex;">
+                    <div class="loading-spinner"></div>
+                    <span>Cargando favoritos...</span>
+                </div>
+                <div id="error" style="display: none;"></div>
+                <div id="no-favoritos" style="display: none; text-align: center; padding: 3rem;">
+                    <h3>No tienes productos favoritos</h3>
+                    <p>Explora nuestra colección y agrega productos a tus favoritos.</p>
+                    <a href="index.html" class="btn-explorar">Explorar Productos</a>
+                </div>
+                <div class="productos-grid" id="productos-grid">
+                    <!-- Los productos favoritos se cargarán aquí dinámicamente -->
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-top">
+            <div class="footer-logo">SHOP.CO</div>
+            <p class="footer-description">
+                Tu destino de moda favorito con las últimas tendencias y los mejores precios.
+            </p>
+            <div class="social-links">
+                <a href="#" class="social-link">Twitter</a>
+                <a href="#" class="social-link">Facebook</a>
+                <a href="#" class="social-link">Instagram</a>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { db, auth } from './js/firebase-config.js';
+        import { collection, getDocs, doc, getDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { requireAuth, trackUserAction, trackPageView } from './js/auth-guard.js';
+
+        let favoritosProductos = [];
+        let filtrosActivos = {
+            ordenamiento: ''
+        };
+
+        // Verificar autenticación al cargar la página
+        document.addEventListener('DOMContentLoaded', async () => {
+            const isAuthenticated = await requireAuth();
+            
+            if (isAuthenticated) {
+                // Registrar vista de página
+                trackPageView('Página de Favoritos');
+                
+                // Cargar favoritos
+                cargarFavoritos();
+                
+                // Configurar eventos de seguimiento
+                setupTrackingEvents();
+            }
+        });
+
+        // Configurar eventos de seguimiento
+        function setupTrackingEvents() {
+            // Ordenamiento
+            document.getElementById('ordenamiento').addEventListener('change', (e) => {
+                filtrosActivos.ordenamiento = e.target.value;
+                aplicarFiltros();
+                trackUserAction('sort_favorites', {
+                    sort_by: e.target.value
+                });
+            });
+        }
+
+        // Función para aplicar filtros
+        function aplicarFiltros() {
+            let productosFiltrados = [...favoritosProductos];
+
+            // Aplicar ordenamiento
+            if (filtrosActivos.ordenamiento) {
+                switch(filtrosActivos.ordenamiento) {
+                    case 'precio-asc':
+                        productosFiltrados.sort((a, b) => {
+                            const precioA = parseFloat(a.precio.replace(/[^0-9.]/g, ''));
+                            const precioB = parseFloat(b.precio.replace(/[^0-9.]/g, ''));
+                            return precioA - precioB;
+                        });
+                        break;
+                    case 'precio-desc':
+                        productosFiltrados.sort((a, b) => {
+                            const precioA = parseFloat(a.precio.replace(/[^0-9.]/g, ''));
+                            const precioB = parseFloat(b.precio.replace(/[^0-9.]/g, ''));
+                            return precioB - precioA;
+                        });
+                        break;
+                    case 'nombre-asc':
+                        productosFiltrados.sort((a, b) => a.nombre.localeCompare(b.nombre));
+                        break;
+                    case 'nombre-desc':
+                        productosFiltrados.sort((a, b) => b.nombre.localeCompare(a.nombre));
+                        break;
+                    case 'fecha-desc':
+                        productosFiltrados.sort((a, b) => b.fechaAgregado - a.fechaAgregado);
+                        break;
+                }
+            }
+
+            // Actualizar contador de productos
+            document.getElementById('productos-count').textContent = 
+                `${productosFiltrados.length} productos favoritos`;
+
+            // Mostrar productos filtrados
+            mostrarProductos(productosFiltrados);
+        }
+
+        // Función para mostrar productos
+        function mostrarProductos(productos) {
+            const productosGrid = document.getElementById('productos-grid');
+            productosGrid.innerHTML = '';
+
+            if (productos.length === 0) {
+                document.getElementById('no-favoritos').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('no-favoritos').style.display = 'none';
+
+            productos.forEach(producto => {
+                const productoElement = document.createElement('div');
+                productoElement.className = 'producto-card';
+                
+                // Calcular descuento si existe precio anterior
+                let descuentoHtml = '';
+                if (producto.precioAntes) {
+                    const precioActual = parseFloat(producto.precio.replace(/[^0-9.]/g, ''));
+                    const precioAnterior = parseFloat(producto.precioAntes.replace(/[^0-9.]/g, ''));
+                    const descuento = Math.round(((precioAnterior - precioActual) / precioAnterior) * 100);
+                    if (descuento > 0) {
+                        descuentoHtml = `<div class="descuento-badge">-${descuento}%</div>`;
+                    }
+                }
+
+                // Hacer que toda la tarjeta sea clickeable
+                productoElement.style.cursor = 'pointer';
+                productoElement.onclick = () => {
+                    const coleccion = producto.genero === 'hombre' ? 'shombre' : 'smujer';
+                    window.location.href = `producto-detalle.html?id=${producto.id}&coleccion=${coleccion}`;
+                };
+
+                productoElement.innerHTML = `
+                    ${descuentoHtml}
+                    <div class="producto-imagen">
+                        <img src="${producto.imagen}" alt="${producto.nombre}">
+                        <div class="producto-overlay">
+                            <button class="btn-agregar activo" onclick="event.stopPropagation(); toggleFavorito('${producto.id}', this)">
+                                <span class="icono-corazon">♥</span>
+                                <span>Quitar de favoritos</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="producto-info">
+                        <h3>${producto.nombre}</h3>
+                        <div class="precios-container">
+                            <p class="precio-actual">${producto.precio}</p>
+                            ${producto.precioAntes ? `<p class="precio-antes">${producto.precioAntes}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+                productosGrid.appendChild(productoElement);
+            });
+        }
+
+        // Función para cargar favoritos
+        async function cargarFavoritos() {
+            const loadingElement = document.getElementById('loading');
+            const errorElement = document.getElementById('error');
+
+            try {
+                loadingElement.style.display = 'flex';
+                errorElement.style.display = 'none';
+
+                if (!auth.currentUser) {
+                    throw new Error('Usuario no autenticado');
+                }
+
+                const userId = auth.currentUser.uid;
+                
+                // Obtener todos los favoritos del usuario con una consulta simple
+                const favoritosRef = collection(db, 'favoritos');
+                const q = query(favoritosRef, where("userId", "==", userId));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    document.getElementById('no-favoritos').style.display = 'block';
+                    loadingElement.style.display = 'none';
+                    return;
+                }
+
+                // Obtener detalles de cada producto favorito
+                favoritosProductos = [];
+                const promesas = [];
+
+                querySnapshot.forEach((docSnapshot) => {
+                    const favorito = docSnapshot.data();
+                    const productoId = favorito.productoId;
+                    
+                    // Crear promesa para obtener el producto
+                    const promesa = (async () => {
+                        try {
+                            // Intentar obtener de la colección de hombres primero
+                            const hombreDocRef = doc(db, 'shombre', productoId);
+                            let productoDoc = await getDoc(hombreDocRef);
+                            let coleccion = 'shombre';
+                            
+                            // Si no está en hombres, intentar en mujeres
+                            if (!productoDoc.exists()) {
+                                const mujerDocRef = doc(db, 'smujer', productoId);
+                                productoDoc = await getDoc(mujerDocRef);
+                                if (productoDoc.exists()) {
+                                    coleccion = 'smujer';
+                                }
+                            }
+                            
+                            if (productoDoc.exists()) {
+                                const producto = productoDoc.data();
+                                producto.id = productoId;
+                                producto.genero = coleccion === 'shombre' ? 'hombre' : 'mujer';
+                                producto.fechaAgregado = favorito.fechaAgregado?.toMillis() || Date.now();
+                                favoritosProductos.push(producto);
+                            }
+                        } catch (error) {
+                            console.error('Error al obtener producto:', productoId, error);
+                        }
+                    })();
+                    
+                    promesas.push(promesa);
+                });
+
+                // Esperar a que se resuelvan todas las promesas
+                await Promise.all(promesas);
+
+                // Ordenar por fecha de agregado (más recientes primero)
+                favoritosProductos.sort((a, b) => b.fechaAgregado - a.fechaAgregado);
+
+                // Mostrar productos favoritos
+                aplicarFiltros();
+
+            } catch (error) {
+                console.error("Error al cargar los favoritos:", error);
+                errorElement.textContent = 'Error al cargar los favoritos. Por favor, intenta de nuevo más tarde.';
+                errorElement.style.display = 'block';
+            } finally {
+                loadingElement.style.display = 'none';
+            }
+        }
+
+        // Función para toggle favorito
+        async function toggleFavorito(productoId, btnElement) {
+            if (!auth.currentUser) {
+                alert('Debes iniciar sesión para gestionar favoritos');
+                return;
+            }
+
+            const userId = auth.currentUser.uid;
+            const favoritosRef = doc(db, 'favoritos', `${userId}_${productoId}`);
+
+            try {
+                // Eliminar de favoritos
+                await deleteDoc(favoritosRef);
+                
+                // Actualizar UI
+                const productoCard = btnElement.closest('.producto-card');
+                productoCard.style.animation = 'fadeOut 0.5s forwards';
+                
+                // Eliminar después de la animación
+                setTimeout(() => {
+                    productoCard.remove();
+                    
+                    // Actualizar contador
+                    const productosFiltrados = document.querySelectorAll('.producto-card');
+                    document.getElementById('productos-count').textContent = 
+                        `${productosFiltrados.length} productos favoritos`;
+                    
+                    // Mostrar mensaje si no hay favoritos
+                    if (productosFiltrados.length === 0) {
+                        document.getElementById('no-favoritos').style.display = 'block';
+                    }
+                    
+                    // Registrar evento
+                    trackUserAction('remove_favorite', {
+                        product_id: productoId
+                    });
+                }, 500);
+                
+            } catch (error) {
+                console.error('Error al eliminar de favoritos:', error);
+                alert('Error al eliminar de favoritos. Por favor, intenta de nuevo.');
+            }
+        }
+
+        // Hacer la función toggleFavorito disponible globalmente
+        window.toggleFavorito = toggleFavorito;
+    </script>
+
+    <!-- Scripts -->
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/navbar-loader.js"></script>
+</body>
+</html> 

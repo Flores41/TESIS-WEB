@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Shop.co</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .login-logo {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .login-title {
+            font-size: 24px;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        
+        .login-description {
+            margin-bottom: 30px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .google-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 12px 20px;
+            font-size: 16px;
+            color: #333;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        
+        .google-btn:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .google-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+        }
+        
+        .login-footer {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #999;
+        }
+        
+        .login-footer a {
+            color: #333;
+            text-decoration: none;
+        }
+        
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra de promoción -->
+    <div class="promo-bar">
+        <p>Regístrate y obtén 20% de descuento en tu primer pedido. <a href="#" class="sign-up-link">Regístrate Ahora</a></p>
+        <button class="close-button">×</button>
+    </div>
+
+    <!-- Contenedor para el navbar reutilizable -->
+    <div class="navbar-container"></div>
+
+    <div class="login-container">
+        <div class="login-logo">SHOP.CO</div>
+        <h1 class="login-title">Iniciar Sesión</h1>
+        <p class="login-description">
+            Accede a tu cuenta para disfrutar de una experiencia personalizada y guardar tus productos favoritos.
+        </p>
+        
+        <button id="google-login" class="google-btn">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="google-icon">
+            Continuar con Google
+        </button>
+        
+        <div id="error-message" class="error-message" style="display: none;"></div>
+        
+        <div class="login-footer">
+            Al iniciar sesión, aceptas nuestros <a href="#">Términos y Condiciones</a> y <a href="#">Política de Privacidad</a>.
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-top">
+            <div class="footer-logo">SHOP.CO</div>
+            <p class="footer-description">
+                Tu destino de moda favorito con las últimas tendencias y los mejores precios.
+            </p>
+            <div class="social-links">
+                <a href="#" class="social-link">Twitter</a>
+                <a href="#" class="social-link">Facebook</a>
+                <a href="#" class="social-link">Instagram</a>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { auth, signInWithGoogle } from './js/firebase-config.js';
+        import { trackUserAction, trackPageView } from './js/auth-guard.js';
+        
+        // Registrar vista de página
+        trackPageView('Página de Inicio de Sesión');
+        
+        // Detectar tipo de dispositivo
+        const userAgent = navigator.userAgent;
+        let deviceType = 'desktop';
+        
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)) {
+            deviceType = 'mobile';
+        } else if (/iPad|Android/i.test(userAgent) && !/Mobile/i.test(userAgent)) {
+            deviceType = 'tablet';
+        }
+        
+        // Registrar tipo de dispositivo
+        trackUserAction('device_detected', {
+            device_type: deviceType,
+            user_agent: userAgent
+        });
+        
+        // Iniciar sesión con Google
+        document.getElementById('google-login').addEventListener('click', async () => {
+            try {
+                const user = await signInWithGoogle();
+                
+                // Registrar inicio de sesión exitoso
+                trackUserAction('login_successful', {
+                    method: 'google',
+                    user_id: user.uid,
+                    user_email: user.email
+                });
+                
+                // Redirigir a la página principal
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Error al iniciar sesión:', error);
+                
+                // Mostrar mensaje de error
+                const errorMessage = document.getElementById('error-message');
+                errorMessage.textContent = 'Error al iniciar sesión. Por favor, intenta de nuevo.';
+                errorMessage.style.display = 'block';
+                
+                // Registrar error de inicio de sesión
+                trackUserAction('login_failed', {
+                    method: 'google',
+                    error_code: error.code,
+                    error_message: error.message
+                });
+            }
+        });
+        
+        // Cerrar barra de promoción
+        document.querySelector('.close-button').addEventListener('click', () => {
+            document.querySelector('.promo-bar').style.display = 'none';
+        });
+    </script>
+
+    <!-- Scripts -->
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/navbar-loader.js"></script>
+</body>
+</html> 

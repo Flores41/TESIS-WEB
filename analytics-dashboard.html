@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Analytics - Shop.co</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Barra de promoción -->
+    <div class="promo-bar">
+        <p>Regístrate y obtén 20% de descuento en tu primer pedido. <a href="#" class="sign-up-link">Regístrate Ahora</a></p>
+        <button class="close-button">×</button>
+    </div>
+
+    <!-- Contenedor para el navbar reutilizable -->
+    <div class="navbar-container"></div>
+
+    <div class="dashboard-container">
+        <h1>Dashboard Analytics</h1>
+        
+        <!-- Resumen de métricas principales -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <h3>Usuarios Activos</h3>
+                <div class="metric-value" id="active-users">0</div>
+                <div class="metric-chart">
+                    <canvas id="usersChart"></canvas>
+                </div>
+            </div>
+            <div class="metric-card">
+                <h3>Dispositivos</h3>
+                <div class="metric-chart">
+                    <canvas id="devicesChart"></canvas>
+                </div>
+            </div>
+            <div class="metric-card">
+                <h3>Páginas más visitadas</h3>
+                <div class="metric-list" id="top-pages"></div>
+            </div>
+            <div class="metric-card">
+                <h3>Tiempo promedio de sesión</h3>
+                <div class="metric-value" id="tiempoPromedioValor">0 min</div>
+                <canvas id="tiempoSesionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Gráficos detallados -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Interacciones con Productos</h3>
+                <canvas id="productInteractionsChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Categorías más populares</h3>
+                <canvas id="categoriesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Tabla de eventos recientes -->
+        <div class="events-table-container">
+            <h3>Eventos Recientes</h3>
+            <table id="events-table">
+                <thead>
+                    <tr>
+                        <th>Fecha/Hora</th>
+                        <th>Evento</th>
+                        <th>Usuario</th>
+                        <th>Detalles</th>
+                    </tr>
+                </thead>
+                <tbody id="events-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <style>
+    .dashboard-container {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .metric-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #333;
+        margin: 1rem 0;
+    }
+
+    .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .chart-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .metric-list {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .metric-list-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .events-table-container {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        overflow-x: auto;
+    }
+
+    #events-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    #events-table th,
+    #events-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+
+    #events-table th {
+        background: #f8f9fa;
+        font-weight: 600;
+    }
+
+    .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 200px;
+    }
+
+    @media (max-width: 768px) {
+        .metrics-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .charts-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .chart-card {
+        height: 400px;
+        position: relative;
+    }
+    .chart-card canvas {
+        max-height: 300px;
+    }
+    </style>
+
+    <script type="module">
+    import { db, auth, analytics, getProductStats, getCategoryStats } from './js/firebase-config.js';
+    import { collection, query, where, orderBy, limit, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // Verificar autenticación
+    auth.onAuthStateChanged(async (user) => {
+        console.log('🔐 Estado de autenticación:', user ? 'Usuario autenticado' : 'No autenticado');
+        if (!user || user.email !== 'cabroputillo@gmail.com') {
+            console.log('⚠️ Acceso denegado - redirigiendo a login');
+            window.location.href = 'login.html';
+            return;
+        }
+        console.log('✅ Acceso autorizado para:', user.email);
+        initializeDashboard();
+    });
+
+    async function initializeDashboard() {
+        console.log('🚀 Iniciando dashboard...');
+        
+        console.log('🎨 Iniciando configuración de gráficos...');
+        setupCharts();
+        
+        console.log('🔄 Configurando actualizaciones en tiempo real...');
+        setupRealtimeUpdates();
+        
+        console.log('📜 Cargando eventos recientes...');
+        loadRecentEvents();
+
+        console.log('📈 Cargando estadísticas almacenadas...');
+        try {
+            await loadStoredStats();
+            console.log('✅ Estadísticas cargadas correctamente');
+        } catch (error) {
+            console.error('❌ Error al cargar estadísticas:', error);
+        }
+    }
+
+    function setupCharts() {
+        try {
+            console.log('🎨 Iniciando configuración de gráficos...');
+            
+            // Destruir gráficos existentes
+            Object.keys(charts).forEach(chartId => {
+                if (charts[chartId]) {
+                    charts[chartId].destroy();
+                    charts[chartId] = null;
+                }
+            });
+
+            // Gráfico de usuarios activos
+            const usersCanvas = document.getElementById('usersChart');
+            if (usersCanvas) {
+                const usersCtx = usersCanvas.getContext('2d');
+                charts.usuariosActivos = new Chart(usersCtx, {
+                    type: 'line',
+                    data: {
+                        labels: getLastNHours(24),
+                        datasets: [{
+                            label: 'Usuarios Activos',
+                            data: Array(24).fill(0),
+                            borderColor: '#4CAF50',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Gráfico de dispositivos
+            const devicesCanvas = document.getElementById('devicesChart');
+            if (devicesCanvas) {
+                const devicesCtx = devicesCanvas.getContext('2d');
+                charts.dispositivos = new Chart(devicesCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Desktop', 'Mobile', 'Tablet'],
+                        datasets: [{
+                            data: [0, 0, 0],
+                            backgroundColor: ['#4CAF50', '#2196F3', '#FFC107']
+                        }]
+                    },
+                    options: {
+                        responsive: true
+                    }
+                });
+            }
+
+            // Gráfico de tiempo de sesión
+            const sessionCanvas = document.getElementById('tiempoSesionChart');
+            if (sessionCanvas) {
+                const sessionCtx = sessionCanvas.getContext('2d');
+                charts.tiempoSesion = new Chart(sessionCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['0-1m', '1-5m', '5-15m', '15-30m', '30m+'],
+                        datasets: [{
+                            label: 'Duración de Sesiones',
+                            data: [0, 0, 0, 0, 0],
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Número de sesiones'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Duración de sesión'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Gráfico de productos más visitados
+            const productsCanvas = document.getElementById('productInteractionsChart');
+            if (productsCanvas) {
+                const productsCtx = productsCanvas.getContext('2d');
+                charts.productosPopulares = new Chart(productsCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Visitas por producto',
+                            data: [],
+                            backgroundColor: '#2196F3',
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'Productos más visitados',
+                                font: {
+                                    size: 16
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Gráfico de categorías más populares
+            const categoriesCanvas = document.getElementById('categoriesChart');
+            if (categoriesCanvas) {
+                const categoriesCtx = categoriesCanvas.getContext('2d');
+                charts.categoriasPopulares = new Chart(categoriesCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Visitas por categoría',
+                            data: [],
+                            backgroundColor: '#4CAF50',
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'Categorías más visitadas',
+                                font: {
+                                    size: 16
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            console.log('✅ Gráficos configurados correctamente');
+        } catch (error) {
+            console.error('❌ Error al configurar gráficos:', error);
+        }
+    }
+
+    function setupRealtimeUpdates() {
+        console.log('🔄 Configurando actualizaciones en tiempo real...');
+        
+        try {
+            // Actualizar estadísticas cada 5 minutos
+            console.log('⏰ Configurando actualización automática cada 5 minutos');
+            setInterval(() => {
+                console.log('🔄 Ejecutando actualización programada de estadísticas');
+                loadStoredStats();
+            }, 300000);
+
+            // Escuchar eventos en tiempo real
+            console.log('👂 Configurando listener de eventos en tiempo real');
+            const eventsRef = collection(db, 'user_events');
+            const q = query(eventsRef, orderBy('timestamp', 'desc'), limit(100));
+
+            onSnapshot(q, (snapshot) => {
+                console.log('📥 Nuevos eventos recibidos:', snapshot.size);
+                const events = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                console.log('🔄 Procesando eventos para actualizar métricas...');
+                updateDashboardMetrics(snapshot.docs);
+            }, error => {
+                console.error('❌ Error en listener de eventos:', error);
+            });
+
+        } catch (error) {
+            console.error('❌ Error en setupRealtimeUpdates:', error);
+        }
+    }
+
+    async function loadRecentEvents() {
+        try {
+            const eventsRef = collection(db, 'user_events');
+            const q = query(eventsRef, orderBy('timestamp', 'desc'), limit(20));
+            const snapshot = await getDocs(q);
+
+            const eventsBody = document.getElementById('events-body');
+            if (!eventsBody) return;
+
+            eventsBody.innerHTML = '';
+
+            if (snapshot.empty) {
+                eventsBody.innerHTML = '<tr><td colspan="4" class="no-events">No hay eventos recientes</td></tr>';
+                return;
+            }
+
+            snapshot.forEach(doc => {
+                try {
+                    const event = doc.data();
+                    if (!event) return;
+
+                    const row = document.createElement('tr');
+                    
+                    // Formatear los detalles del evento de manera más legible
+                    let detallesFormateados = '';
+                    if (event.params) {
+                        const detalles = [];
+                        
+                        // Formatear información del dispositivo
+                        if (event.device_type) {
+                            detalles.push(`<strong>Dispositivo:</strong> ${event.device_type}`);
+                        }
+                        if (event.browser) {
+                            detalles.push(`<strong>Navegador:</strong> ${event.browser}`);
+                        }
+                        
+                        // Formatear información específica según el tipo de evento
+                        switch (event.action) {
+                            case 'page_view':
+                                if (event.page_name) detalles.push(`<strong>Página:</strong> ${event.page_name}`);
+                                if (event.page_title) detalles.push(`<strong>Título:</strong> ${event.page_title}`);
+                                break;
+                            case 'product_view':
+                                if (event.product_id) detalles.push(`<strong>ID Producto:</strong> ${event.product_id}`);
+                                if (event.product_name) detalles.push(`<strong>Producto:</strong> ${event.product_name}`);
+                                if (event.product_category) detalles.push(`<strong>Categoría:</strong> ${event.product_category}`);
+                                break;
+                            case 'add_favorite':
+                            case 'remove_favorite':
+                                if (event.product_id) detalles.push(`<strong>ID Producto:</strong> ${event.product_id}`);
+                                break;
+                            case 'session_start':
+                            case 'session_end':
+                                if (event.duration) detalles.push(`<strong>Duración:</strong> ${formatDuration(event.duration)}`);
+                                break;
+                        }
+
+                        // Agregar cualquier otro parámetro no procesado
+                        Object.entries(event.params || {}).forEach(([key, value]) => {
+                            if (!['device_type', 'browser', 'page_name', 'page_title', 'product_id', 'product_name', 'product_category', 'duration'].includes(key)) {
+                                detalles.push(`<strong>${key}:</strong> ${value}`);
+                            }
+                        });
+
+                        detallesFormateados = detalles.join(' | ');
+                    }
+
+                    // Formatear el tipo de evento de manera más amigable
+                    const formatearTipoEvento = (action) => {
+                        const tipos = {
+                            'page_view': 'Vista de página',
+                            'product_view': 'Vista de producto',
+                            'add_favorite': 'Agregar a favoritos',
+                            'remove_favorite': 'Quitar de favoritos',
+                            'session_start': 'Inicio de sesión',
+                            'session_end': 'Fin de sesión',
+                            'login': 'Inicio de sesión',
+                            'logout': 'Cierre de sesión'
+                        };
+                        return tipos[action] || action;
+                    };
+
+                    row.innerHTML = `
+                        <td class="event-time">${event.timestamp ? formatDate(event.timestamp) : 'N/A'}</td>
+                        <td class="event-type">
+                            <span class="event-badge ${event.action || 'unknown'}">${formatearTipoEvento(event.action) || 'N/A'}</span>
+                        </td>
+                        <td class="event-user">
+                            ${event.user_id ? `
+                                <div class="user-info">
+                                    <span class="user-id">${event.user_id.substring(0, 8)}...</span>
+                                </div>
+                            ` : 'N/A'}
+                        </td>
+                        <td class="event-details">${detallesFormateados || '{}'}</td>
+                    `;
+                    eventsBody.appendChild(row);
+                } catch (err) {
+                    console.error('Error al procesar evento:', err);
+                }
+            });
+
+            // Agregar estilos adicionales
+            const style = document.createElement('style');
+            style.textContent = `
+                .event-badge {
+                    padding: 4px 8px;
+                    border-radius: 12px;
+                    font-size: 0.85em;
+                    font-weight: 500;
+                    white-space: nowrap;
+                }
+
+                .event-badge.page_view { background-color: #E3F2FD; color: #1565C0; }
+                .event-badge.product_view { background-color: #E8F5E9; color: #2E7D32; }
+                .event-badge.add_favorite { background-color: #FFF3E0; color: #E65100; }
+                .event-badge.remove_favorite { background-color: #FCE4EC; color: #C2185B; }
+                .event-badge.session_start { background-color: #F3E5F5; color: #7B1FA2; }
+                .event-badge.session_end { background-color: #EFEBE9; color: #4E342E; }
+                .event-badge.login { background-color: #E8EAF6; color: #3949AB; }
+                .event-badge.logout { background-color: #FFEBEE; color: #C62828; }
+                .event-badge.unknown { background-color: #F5F5F5; color: #616161; }
+
+                .event-time {
+                    font-family: monospace;
+                    color: #666;
+                }
+
+                .event-details {
+                    font-size: 0.9em;
+                    line-height: 1.4;
+                }
+
+                .event-details strong {
+                    color: #555;
+                }
+
+                .user-info {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                .user-id {
+                    font-family: monospace;
+                    background: #f5f5f5;
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                    font-size: 0.9em;
+                }
+
+                .no-events {
+                    text-align: center;
+                    color: #666;
+                    padding: 2rem;
+                    font-style: italic;
+                }
+
+                #events-table td {
+                    vertical-align: middle;
+                }
+            `;
+            document.head.appendChild(style);
+
+        } catch (error) {
+            console.error('Error al cargar eventos recientes:', error);
+            const eventsBody = document.getElementById('events-body');
+            if (eventsBody) {
+                eventsBody.innerHTML = '<tr><td colspan="4" class="no-events">Error al cargar eventos</td></tr>';
+            }
+        }
+    }
+
+    function formatDuration(seconds) {
+        if (!seconds) return 'N/A';
+        if (seconds < 60) return `${seconds} seg`;
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes}m ${remainingSeconds}s`;
+    }
+
+    function updateDashboardMetrics(events) {
+        if (!events || events.length === 0) return;
+
+        try {
+            // Actualizar usuarios activos
+            const activeUsers = new Set(
+                events
+                    .filter(doc => doc.data() && doc.data().user_id)
+                    .map(doc => doc.data().user_id)
+            ).size;
+            document.getElementById('active-users').textContent = activeUsers;
+
+            // Actualizar dispositivos
+            const devices = events.reduce((acc, doc) => {
+                const data = doc.data();
+                if (data && data.device_type) {
+                    acc[data.device_type] = (acc[data.device_type] || 0) + 1;
+                }
+                return acc;
+            }, {});
+
+            // Actualizar el gráfico de dispositivos
+            const devicesChart = Chart.getChart('devicesChart');
+            if (devicesChart) {
+                devicesChart.data.datasets[0].data = [
+                    devices['desktop'] || 0,
+                    devices['mobile'] || 0,
+                    devices['tablet'] || 0
+                ];
+                devicesChart.update();
+            }
+
+            // Actualizar páginas más visitadas
+            const pages = events.reduce((acc, doc) => {
+                const data = doc.data();
+                if (data && data.action === 'page_view' && data.page_name) {
+                    acc[data.page_name] = (acc[data.page_name] || 0) + 1;
+                }
+                return acc;
+            }, {});
+
+            updateTopPages(pages);
+
+            // Actualizar categorías más populares
+            const categorias = events.reduce((acc, doc) => {
+                const data = doc.data();
+                if (data && data.action === 'product_view' && data.product_category) {
+                    acc[data.product_category] = (acc[data.product_category] || 0) + 1;
+                }
+                return acc;
+            }, {});
+
+            // Actualizar el gráfico de categorías
+            const categoriesChart = Chart.getChart('categoriesChart');
+            if (categoriesChart) {
+                const sortedCategories = Object.entries(categorias)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 5);
+                
+                categoriesChart.data.labels = sortedCategories.map(([cat]) => cat);
+                categoriesChart.data.datasets[0].data = sortedCategories.map(([,count]) => count);
+                categoriesChart.update();
+            }
+
+            // Actualizar productos más visitados
+            const productos = events.reduce((acc, doc) => {
+                const data = doc.data();
+                if (data && data.action === 'product_view' && data.product_name) {
+                    acc[data.product_name] = {
+                        count: (acc[data.product_name]?.count || 0) + 1,
+                        category: data.product_category || 'Sin categoría',
+                        id: data.product_id || ''
+                    };
+                }
+                return acc;
+            }, {});
+
+            // Actualizar el gráfico de interacciones con productos
+            const productChart = Chart.getChart('productInteractionsChart');
+            if (productChart) {
+                const sortedProducts = Object.entries(productos)
+                    .sort(([,a], [,b]) => b.count - a.count)
+                    .slice(0, 5);
+
+                productChart.data.labels = sortedProducts.map(([name]) => name);
+                productChart.data.datasets[0].data = sortedProducts.map(([,data]) => data.count);
+                productChart.update();
+            }
+
+            // Actualizar las tarjetas de métricas con detalles adicionales
+            updateProductMetrics(productos, categorias);
+
+        } catch (error) {
+            console.error('Error al actualizar métricas:', error);
+        }
+    }
+
+    function updateTopPages(pages) {
+        if (!pages) return;
+
+        try {
+            const topPagesElement = document.getElementById('top-pages');
+            if (!topPagesElement) return;
+
+            topPagesElement.innerHTML = '';
+
+            const sortedPages = Object.entries(pages)
+                .filter(([page]) => page) // Filtrar páginas undefined o null
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 5);
+
+            if (sortedPages.length === 0) {
+                topPagesElement.innerHTML = '<div class="metric-list-item"><span>No hay datos disponibles</span></div>';
+                return;
+            }
+
+            sortedPages.forEach(([page, count]) => {
+                const div = document.createElement('div');
+                div.className = 'metric-list-item';
+                div.innerHTML = `
+                    <span>${page}</span>
+                    <span>${count} visitas</span>
+                `;
+                topPagesElement.appendChild(div);
+            });
+        } catch (error) {
+            console.error('Error al actualizar páginas más visitadas:', error);
+        }
+    }
+
+    function getLastNHours(n) {
+        const hours = [];
+        const now = new Date();
+        for (let i = n - 1; i >= 0; i--) {
+            const d = new Date(now);
+            d.setHours(d.getHours() - i);
+            hours.push(d.getHours() + ':00');
+        }
+        return hours;
+    }
+
+    function formatDate(timestamp) {
+        try {
+            if (!timestamp || !timestamp.toDate) return 'N/A';
+            const date = timestamp.toDate();
+            return new Intl.DateTimeFormat('es', {
+                dateStyle: 'short',
+                timeStyle: 'short'
+            }).format(date);
+        } catch (error) {
+            console.error('Error al formatear fecha:', error);
+            return 'N/A';
+        }
+    }
+
+    function updateProductMetrics(productos, categorias) {
+        // Actualizar lista de productos más visitados con detalles
+        const productList = document.createElement('div');
+        productList.className = 'product-metrics';
+        
+        const topProducts = Object.entries(productos)
+            .sort(([,a], [,b]) => b.count - a.count)
+            .slice(0, 5);
+
+        const productHTML = topProducts.map(([name, data]) => `
+            <div class="metric-detail-item">
+                <div class="metric-detail-header">
+                    <span class="product-name">${name}</span>
+                    <span class="visit-count">${data.count} visitas</span>
+                </div>
+                <div class="metric-detail-info">
+                    <span class="category-tag">${data.category}</span>
+                    ${data.id ? `<span class="product-id">ID: ${data.id}</span>` : ''}
+                </div>
+            </div>
+        `).join('');
+
+        // Actualizar lista de categorías más visitadas
+        const categoryList = document.createElement('div');
+        categoryList.className = 'category-metrics';
+        
+        const topCategories = Object.entries(categorias)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 5);
+
+        const categoryHTML = topCategories.map(([category, count]) => `
+            <div class="metric-detail-item">
+                <div class="metric-detail-header">
+                    <span class="category-name">${category}</span>
+                    <span class="visit-count">${count} visitas</span>
+                </div>
+            </div>
+        `).join('');
+
+        // Agregar estilos para las nuevas métricas
+        const style = document.createElement('style');
+        style.textContent = `
+            .product-metrics, .category-metrics {
+                margin-top: 1rem;
+            }
+
+            .metric-detail-item {
+                background: #f8f9fa;
+                border-radius: 8px;
+                padding: 0.8rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .metric-detail-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 0.5rem;
+            }
+
+            .product-name, .category-name {
+                font-weight: 500;
+                color: #333;
+            }
+
+            .visit-count {
+                background: #e3f2fd;
+                color: #1565c0;
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 0.85em;
+            }
+
+            .metric-detail-info {
+                display: flex;
+                gap: 0.5rem;
+                font-size: 0.85em;
+            }
+
+            .category-tag {
+                background: #e8f5e9;
+                color: #2e7d32;
+                padding: 2px 8px;
+                border-radius: 12px;
+            }
+
+            .product-id {
+                color: #666;
+                font-family: monospace;
+            }
+
+            .chart-card {
+                position: relative;
+            }
+
+            .chart-info {
+                position: absolute;
+                top: 1rem;
+                right: 1rem;
+                font-size: 0.85em;
+                color: #666;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Actualizar el contenido en las tarjetas
+        const productCard = document.querySelector('.chart-card:first-child');
+        const categoryCard = document.querySelector('.chart-card:last-child');
+
+        if (productCard) {
+            const productMetricsContainer = productCard.querySelector('.product-metrics') || document.createElement('div');
+            productMetricsContainer.className = 'product-metrics';
+            productMetricsContainer.innerHTML = productHTML;
+            productCard.appendChild(productMetricsContainer);
+        }
+
+        if (categoryCard) {
+            const categoryMetricsContainer = categoryCard.querySelector('.category-metrics') || document.createElement('div');
+            categoryMetricsContainer.className = 'category-metrics';
+            categoryMetricsContainer.innerHTML = categoryHTML;
+            categoryCard.appendChild(categoryMetricsContainer);
+        }
+    }
+
+    async function loadStoredStats() {
+        console.log('📊 Iniciando carga de estadísticas...');
+        
+        try {
+            console.log('🏷️ Obteniendo estadísticas de productos...');
+            const productStats = await getProductStats();
+            console.log('📦 Estadísticas de productos obtenidas:', productStats);
+            
+            // Actualizar gráfico de productos
+            const productChart = Chart.getChart('productInteractionsChart');
+            if (productChart && productStats.length > 0) {
+                console.log('📈 Actualizando gráfico de productos con', productStats.length, 'elementos');
+                productChart.data.labels = productStats.map(stat => stat.name);
+                productChart.data.datasets[0].data = productStats.map(stat => stat.views);
+                productChart.update();
+            } else {
+                console.log('⚠️ No se pudo actualizar el gráfico de productos:', !productChart ? 'Gráfico no encontrado' : 'Sin datos');
+            }
+
+            console.log('🏷️ Obteniendo estadísticas de categorías...');
+            const categoryStats = await getCategoryStats();
+            console.log('📦 Estadísticas de categorías obtenidas:', categoryStats);
+            
+            // Actualizar gráfico de categorías
+            const categoryChart = Chart.getChart('categoriesChart');
+            if (categoryChart && categoryStats.length > 0) {
+                console.log('📈 Actualizando gráfico de categorías con', categoryStats.length, 'elementos');
+                categoryChart.data.labels = categoryStats.map(stat => stat.name);
+                categoryChart.data.datasets[0].data = categoryStats.map(stat => stat.views);
+                categoryChart.update();
+            } else {
+                console.log('⚠️ No se pudo actualizar el gráfico de categorías:', !categoryChart ? 'Gráfico no encontrado' : 'Sin datos');
+            }
+
+        } catch (error) {
+            console.error('❌ Error al cargar estadísticas almacenadas:', error);
+            throw error;
+        }
+    }
+
+    // Actualizar los estilos para incluir nuevos elementos
+    const additionalStyles = document.createElement('style');
+    additionalStyles.textContent = `
+        .last-viewed {
+            color: #666;
+            font-size: 0.85em;
+        }
+
+        .products-count {
+            background: #f3e5f5;
+            color: #7b1fa2;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.85em;
+        }
+
+        .metric-detail-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+    `;
+    document.head.appendChild(additionalStyles);
+
+    function actualizarGraficoTiempoSesion(sesiones) {
+        // Destruir gráfico existente si existe
+        if (charts.tiempoSesion) {
+            charts.tiempoSesion.destroy();
+        }
+
+        const ctx = document.getElementById('tiempoSesionChart').getContext('2d');
+
+        // Definir rangos de tiempo en minutos
+        const rangos = {
+            '0-1m': 0,
+            '1-5m': 0,
+            '5-15m': 0,
+            '15-30m': 0,
+            '30m+': 0
+        };
+
+        // Procesar sesiones y clasificarlas en rangos
+        sesiones.forEach(sesion => {
+            const duracionMinutos = sesion.duration / 60; // Convertir segundos a minutos
+
+            if (duracionMinutos <= 1) {
+                rangos['0-1m']++;
+            } else if (duracionMinutos <= 5) {
+                rangos['1-5m']++;
+            } else if (duracionMinutos <= 15) {
+                rangos['5-15m']++;
+            } else if (duracionMinutos <= 30) {
+                rangos['15-30m']++;
+            } else {
+                rangos['30m+']++;
+            }
+        });
+
+        const data = {
+            labels: Object.keys(rangos),
+            datasets: [{
+                label: 'Duración de Sesiones',
+                data: Object.values(rangos),
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        };
+
+        charts.tiempoSesion = new Chart(ctx, {
+            type: 'bar',
+            data: data,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Número de sesiones'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Duración de sesión'
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Distribución de Duración de Sesiones'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.parsed.y} sesiones`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Calcular y mostrar el tiempo promedio
+        const tiempoTotal = sesiones.reduce((acc, sesion) => acc + sesion.duration, 0);
+        const promedio = sesiones.length > 0 ? Math.round(tiempoTotal / sesiones.length / 60) : 0;
+        document.getElementById('tiempoPromedioValor').textContent = `${promedio} min`;
+    }
+
+    // Actualizar la función principal que obtiene los datos
+    async function actualizarDashboard() {
+        try {
+            // Obtener datos de sesiones desde Firestore
+            const sessionRef = collection(db, 'session_events');
+            const q = query(sessionRef, orderBy('timestamp', 'desc'), limit(100));
+            const snapshot = await getDocs(q);
+            
+            const sesiones = snapshot.docs.map(doc => ({
+                duration: doc.data().duration || 0,
+                timestamp: doc.data().timestamp
+            }));
+
+            // Actualizar el gráfico de tiempo de sesión
+            actualizarGraficoTiempoSesion(sesiones);
+            
+            // ... resto del código existente ...
+        } catch (error) {
+            console.error('Error al actualizar dashboard:', error);
+        }
+    }
+
+    const charts = {
+        usuariosActivos: null,
+        dispositivos: null,
+        paginasVisitadas: null,
+        tiempoSesion: null,
+        productosPopulares: null,
+        categoriasPopulares: null
+    };
+
+    // Asegurarse de que el DOM esté cargado antes de inicializar
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('🚀 DOM cargado, iniciando configuración...');
+        setupCharts();
+        actualizarDashboard();
+    });
+    </script>
+
+    <!-- Scripts -->
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/navbar-loader.js"></script>
+</body>
+</html> 

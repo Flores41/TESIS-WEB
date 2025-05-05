@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles del Producto - Shop.co</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Agregar marked.js para procesar markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <!-- Barra de promoción -->
+    <div class="promo-bar">
+        <p>Regístrate y obtén 20% de descuento en tu primer pedido. <a href="#" class="sign-up-link">Regístrate Ahora</a></p>
+        <button class="close-button">×</button>
+    </div>
+
+    <!-- Contenedor para el navbar reutilizable -->
+    <div class="navbar-container"></div>
+
+    <div class="producto-detalle-container">
+        <div class="producto-detalle-layout">
+            <!-- Sección de imágenes con skeleton loading -->
+            <div class="producto-imagenes">
+                <div class="imagen-principal skeleton-loading">
+                    <button class="btn-favoritos" onclick="toggleFavorito()">
+                        <span class="icono-corazon">♡</span>
+                        <span class="texto-btn">Agregar a favoritos</span>
+                    </button>
+                    <img id="imagen-producto" src="" alt="" onload="this.parentElement.classList.remove('skeleton-loading')">
+                </div>
+            </div>
+
+            <!-- Sección de información -->
+            <div class="producto-info-detalle">
+                <h1 id="nombre-producto" class="skeleton-text"></h1>
+                <div class="precios-container">
+                    <p class="precio-actual skeleton-text" id="precio-actual"></p>
+                    <p class="precio-antes" id="precio-antes"></p>
+                </div>
+
+                <!-- Contenido generado por Gemini -->
+                <div class="producto-descripcion">
+                    <div id="loading-description" class="loading-container">
+                        <div class="loading-spinner"></div>
+                        <span>Generando descripción detallada...</span>
+                    </div>
+                    
+                    <div id="descripcion-contenido" class="descripcion-sections">
+                        <div class="seccion">
+                            <h2>Descripción</h2>
+                            <div id="descripcion-texto" class="markdown-content"></div>
+                        </div>
+
+                        <div class="seccion">
+                            <h2>Características</h2>
+                            <div id="caracteristicas-lista" class="markdown-content"></div>
+                        </div>
+
+                        <div class="seccion">
+                            <h2>Medidas del modelo</h2>
+                            <div id="medidas-modelo" class="markdown-content"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-top">
+            <div class="footer-logo">SHOP.CO</div>
+            <p class="footer-description">
+                Tu destino de moda favorito con las últimas tendencias y los mejores precios.
+            </p>
+            <div class="social-links">
+                <a href="#" class="social-link">Twitter</a>
+                <a href="#" class="social-link">Facebook</a>
+                <a href="#" class="social-link">Instagram</a>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { db, auth, trackProductView } from './js/firebase-config.js';
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Configuración de la API de Gemini
+        const GEMINI_API_KEY = 'AIzaSyA0PkP6I-6U8Rob-i7_kJmKex6d3fePkDg';
+        const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
+
+        // Configurar marked.js
+        marked.setOptions({
+            breaks: true,
+            gfm: true,
+            headerIds: false,
+            mangle: false,
+            sanitize: true
+        });
+
+        // Función para procesar Markdown
+        function procesarMarkdown(texto) {
+            if (!texto) return '';
+            return marked.parse(texto);
+        }
+
+        async function generateProductDetails(product) {
+            const loadingElement = document.getElementById('loading-description');
+            const descripcionContenido = document.getElementById('descripcion-contenido');
+
+            try {
+                loadingElement.style.display = 'flex';
+                descripcionContenido.style.display = 'none';
+
+                const prompt = `
+Eres un experto redactor de moda y tecnología de vestimenta. Escribe contenido altamente detallado y atractivo en español para un producto, dividiéndolo en tres secciones claramente marcadas usando el siguiente formato en Markdown:
+
+**Descripción:**
+Redacta una descripción persuasiva y emocional del producto. Usa adjetivos atractivos, resalta su utilidad, estilo, ocasión de uso y beneficios emocionales que transmite. Evita repetir el nombre del producto más de una vez.
+
+**Características:**
+Lista al menos 6 características técnicas o funcionales usando viñetas con guiones (-). Enfócate en materiales, diseño, beneficios prácticos, estilo y durabilidad. Usa negritas (**) para destacar los títulos de cada característica.
+
+**Medidas del modelo:**
+Si el producto es ropa, indica: "La modelo mide 1.75m y usa talla S."  
+Si el producto **no es ropa** (como carteras, relojes, accesorios), indica: "Este producto no requiere medidas del modelo."
+
+Producto:
+- Nombre: ${product.nombre}
+- Categoría: ${product.categoria}
+- Color: ${product.color}
+- Género: ${product.genero}
+`;
+
+                console.log('Enviando solicitud a Gemini API...');
+                const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: prompt
+                            }]
+                        }]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error en la API: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                console.log('Respuesta de Gemini:', data);
+
+                if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0]) {
+                    throw new Error('Respuesta inválida de la API');
+                }
+
+                const generatedText = data.candidates[0].content.parts[0].text;
+                console.log('Texto generado:', generatedText);
+
+                // Extraer secciones usando expresiones regulares
+                const descMatch = /\*\*Descripción:\*\*\n([\s\S]*?)(?=\n\*\*Características:|$)/i.exec(generatedText);
+                const featMatch = /\*\*Características:\*\*\n([\s\S]*?)(?=\n\*\*Medidas del modelo:|$)/i.exec(generatedText);
+                const measMatch = /\*\*Medidas del modelo:\*\*\n([\s\S]*?)$/i.exec(generatedText);
+
+                if (!descMatch || !featMatch || !measMatch) {
+                    throw new Error('No se pudieron extraer todas las secciones del texto generado');
+                }
+
+                // Actualizar el contenido en la página usando Markdown
+                document.getElementById('descripcion-texto').innerHTML = procesarMarkdown(descMatch[1].trim());
+                document.getElementById('caracteristicas-lista').innerHTML = procesarMarkdown(featMatch[1].trim());
+                document.getElementById('medidas-modelo').innerHTML = procesarMarkdown(measMatch[1].trim());
+
+            } catch (error) {
+                console.error('Error al generar la descripción:', error);
+                document.getElementById('descripcion-texto').innerHTML = `<p class="error">Error al generar la descripción: ${error.message}</p>`;
+                document.getElementById('caracteristicas-lista').innerHTML = '<p class="error">Error al generar las características</p>';
+                document.getElementById('medidas-modelo').innerHTML = '<p class="error">Error al generar las medidas</p>';
+            } finally {
+                loadingElement.style.display = 'none';
+                descripcionContenido.style.display = 'block';
+            }
+        }
+
+        // Cargar detalles del producto
+        async function cargarDetallesProducto() {
+            const params = new URLSearchParams(window.location.search);
+            const productId = params.get('id');
+            const coleccion = params.get('coleccion');
+
+            if (!productId || !coleccion) {
+                console.error('❌ ID de producto o colección no proporcionados');
+                return;
+            }
+
+            try {
+                console.log('🔍 Cargando detalles del producto:', { productId, coleccion });
+                const docRef = doc(db, coleccion, productId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const producto = docSnap.data();
+                    console.log('📦 Datos del producto obtenidos:', producto);
+                    
+                    // Registrar vista del producto
+                    console.log('📊 Registrando vista del producto...');
+                    await trackProductView({
+                        product_id: productId,
+                        product_name: producto.nombre,
+                        product_category: producto.categoria
+                    });
+                    console.log('✅ Vista del producto registrada correctamente');
+
+                    // Actualizar la información básica del producto
+                    document.getElementById('nombre-producto').textContent = producto.nombre;
+                    document.getElementById('nombre-producto').classList.remove('skeleton-text');
+                    
+                    const imgProducto = document.getElementById('imagen-producto');
+                    imgProducto.src = producto.imagen;
+                    imgProducto.alt = producto.nombre;
+                    
+                    const precioActual = document.getElementById('precio-actual');
+                    precioActual.textContent = `S/ ${producto.precio}`;
+                    precioActual.classList.remove('skeleton-text');
+                    
+                    if (producto.precioAntes) {
+                        document.getElementById('precio-antes').textContent = `S/ ${producto.precioAntes}`;
+                    }
+
+                    // Generar descripción detallada usando Gemini
+                    await generateProductDetails(producto);
+                } else {
+                    console.error('❌ Producto no encontrado');
+                }
+            } catch (error) {
+                console.error("❌ Error al cargar los detalles del producto:", error);
+            }
+        }
+
+        // Cargar los detalles cuando la página esté lista
+        document.addEventListener('DOMContentLoaded', cargarDetallesProducto);
+    </script>
+
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/navbar-loader.js"></script>
+</body>
+</html> 

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Shop.co - Tu Tienda de Moda</title>
+        <link rel="stylesheet" href="css/styles.css" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;900&display=swap"
+            rel="stylesheet" />
+    </head>
+
+    <body>
+
+        <!-- Promo Bar -->
+        <div class="promo-bar">
+            <p>Regístrate y obtén 20% de descuento en tu primer pedido. <a
+                    href="#" class="sign-up-link">Regístrate Ahora</a></p>
+            <button class="close-button">×</button>
+        </div>
+
+        <!-- Contenedor para el navbar reutilizable -->
+        <div class="navbar-container"></div>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>ENCUENTRA ROPA<br>QUE COMBINE<br>CON TU ESTILO</h1>
+                    <p>Explora nuestra diversa gama de prendas meticulosamente
+                        elaboradas, diseñadas para resaltar tu individualidad y
+                        adaptarse a tu sentido del estilo.</p>
+                    <button class="shop-now" id="explorar-btn">Explorar Ahora</button>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <h2>200+</h2>
+                        <p>Marcas Internacionales</p>
+                    </div>
+                    <div class="stat">
+                        <h2>2,000+</h2>
+                        <p>Productos de Alta Calidad</p>
+                    </div>
+                    <div class="stat">
+                        <h2>30,000+</h2>
+                        <p>Clientes Satisfechos</p>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-image">
+                <!-- La imagen se añadirá vía CSS como background -->
+            </div>
+        </section>
+
+        <!-- Marcas -->
+        <section class="brands">
+            <div class="brands-container">
+                <!-- Nike -->
+                <div class="brand-logo">
+                    <svg viewBox="0 0 100 40" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M20 25C30 15 40 10 90 5C70 15 50 25 30 35C20 40 5 40 2 30C0 25 0 20 2 15C5 10 10 10 15 12C25 15 15 25 20 25Z"
+                            fill="currentColor" />
+                    </svg>
+                    <span class="brand-name">NIKE</span>
+                </div>
+                <!-- Adidas -->
+                <div class="brand-logo">
+                    <svg viewBox="0 0 120 40" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 30L30 10L50 30H10Z" fill="currentColor" />
+                        <path d="M40 30L60 10L80 30H40Z" fill="currentColor" />
+                        <path d="M70 30L90 10L110 30H70Z" fill="currentColor" />
+                    </svg>
+                    <span class="brand-name">ADIDAS</span>
+                </div>
+                <!-- Puma -->
+                <div class="brand-logo">
+                    <svg viewBox="0 0 100 40" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M20 35C15 35 10 30 10 25C10 20 15 15 20 15C25 15 28 18 30 20C35 25 40 25 45 20L50 15C45 25 40 35 20 35Z"
+                            fill="currentColor" />
+                        <path
+                            d="M30 15L40 5C45 0 50 0 55 5L45 15C40 20 35 20 30 15Z"
+                            fill="currentColor" />
+                    </svg>
+                    <span class="brand-name">PUMA</span>
+                </div>
+                <!-- Zara -->
+                <div class="brand-logo">
+                    <svg viewBox="0 0 120 40" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 10H100L80 30H0L20 10Z"
+                            fill="currentColor" />
+                    </svg>
+                    <span class="brand-name">ZARA</span>
+                </div>
+                <!-- H&M -->
+                <div class="brand-logo">
+                    <svg viewBox="0 0 120 40" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 10V30M10 20H30M30 10V30" fill="none"
+                            stroke="currentColor" stroke-width="4" />
+                        <path d="M50 10V30M50 20H70M70 10V30" fill="none"
+                            stroke="currentColor" stroke-width="4" />
+                        <circle cx="90" cy="20" r="10" fill="none"
+                            stroke="currentColor" stroke-width="4" />
+                    </svg>
+                    <span class="brand-name">H&M</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección New Arrivals -->
+        <section class="new-arrivals">
+            <h2 class="section-title">NEW ARRIVALS</h2>
+
+            <div class="products-grid">
+                <!-- Producto 1 -->
+                <div class="product-card" data-product-id="1">
+                    <div class="product-image">
+                        <img src="img/5.jpg" alt="T-shirt with Tape Details">
+                    </div>
+                    <div class="product-info">
+                        <h3>T-SHIRT WITH TAPE DETAILS</h3>
+                        <div class="rating-badge">
+                            <span class="star-icon">★</span>
+                            4.5/5
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Producto 2 -->
+                <div class="product-card" data-product-id="2">
+                    <div class="product-image">
+                        <img src="img/6.jpg" alt="Skinny Fit Jeans">
+                    </div>
+                    <div class="product-info">
+                        <h3>SKINNY FIT JEANS</h3>
+                        <div class="rating-badge">
+                            <span class="star-icon">★</span>
+                            4.5/5
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Producto 3 -->
+                <div class="product-card" data-product-id="3">
+                    <div class="product-image">
+                        <img src="img/7.jpg" alt="Checkered Shirt">
+                    </div>
+                    <div class="product-info">
+                        <h3>CHECKERED SHIRT</h3>
+                        <div class="rating-badge">
+                            <span class="star-icon">★</span>
+                            4.5/5
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Producto 4 -->
+                <div class="product-card" data-product-id="4">
+                    <div class="product-image">
+                        <img src="img/8.jpg" alt="Sleeve Striped T-shirt">
+                    </div>
+                    <div class="product-info">
+                        <h3>SLEEVE STRIPED T-SHIRT</h3>
+                        <div class="rating-badge">
+                            <span class="star-icon">★</span>
+                            4.5/5
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Selling Section -->
+            <h2 class="section-title">TOP SELLING</h2>
+
+            <div class="products-grid">
+                <!-- Los mismos productos se repiten en Top Selling -->
+                <!-- Producto 1 -->
+                <div class="product-card" data-product-id="5">
+                    <div class="product-image">
+                        <img src="img/9.jpg" alt="T-shirt with Tape Details">
+                    </div>
+                    <div class="product-info">
+                        <h3>T-SHIRT WITH TAPE DETAILS</h3>
+                        <div class="rating-badge">
+                            <span class="star-icon">★</span>
+                            4.5/5
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Producto 2 -->
+                <div class="product-card" data-product-id="6">
+                    <div class="product-image">
+                        <img src="img/10.jpg" alt="Skinny Fit Jeans">
+                    </div>
+                    <div class="product-info">
+                        <h3>SKINNY FIT JEANS</h3>
+                        <div class="rating-badge">
+                            <span class="star-icon">★</span>
+                            4.5/5
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Producto 3 -->
+                <div class="product-card" data-product-id="7">
+                    <div class="product-image">
+                        <img src="img/11.jpg" alt="Checkered Shirt">
+                    </div>
+                    <div class="product-info">
+                        <h3>CHECKERED SHIRT</h3>
+                        <div class="rating-badge">
+                            <span class="star-icon">★</span>
+                            4.5/5
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Producto 4 -->
+                <div class="product-card" data-product-id="8">
+                    <div class="product-image">
+                        <img src="img/12.jpg" alt="Sleeve Striped T-shirt">
+                    </div>
+                    <div class="product-info">
+                        <h3>SLEEVE STRIPED T-SHIRT</h3>
+                        <div class="rating-badge">
+                            <span class="star-icon">★</span>
+                            4.5/5
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección Browse by Dress Style -->
+        <section class="browse-styles">
+            <h2 class="section-title">BROWSE BY DRESS STYLE</h2>
+            <div class="styles-grid">
+                <a href="#" class="style-card casual" data-style="casual">
+                    <div class="style-content">
+                        <h3>Casual</h3>
+                    </div>
+                    <div class="style-image">
+                        <img src="img/1.jpg" alt="Casual Style">
+                    </div>
+                </a>
+                <a href="#" class="style-card formal" data-style="formal">
+                    <div class="style-content">
+                        <h3>Formal</h3>
+                    </div>
+                    <div class="style-image">
+                        <img src="img/2.jpg" alt="Formal Style">
+                    </div>
+                </a>
+                <a href="#" class="style-card party" data-style="party">
+                    <div class="style-content">
+                        <h3>Party</h3>
+                    </div>
+                    <div class="style-image">
+                        <img src="img/3.jpg" alt="Party Style">
+                    </div>
+                </a>
+                <a href="#" class="style-card gym" data-style="gym">
+                    <div class="style-content">
+                        <h3>Gym</h3>
+                    </div>
+                    <div class="style-image">
+                        <img src="img/4.jpg" alt="Gym Style">
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <div class="footer-top">
+                <div class="footer-logo">SHOP.CO</div>
+                <p class="footer-description">We have clothes that suits your
+                    style and which you're proud to wear. From women to men.</p>
+                <div class="social-links">
+                    <a href="#" class="social-link">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <rect x="2" y="2" width="20" height="20" rx="5" />
+                            <path d="M12 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"
+                                fill="white" />
+                            <circle cx="17" cy="7" r="1" fill="white" />
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
+                        </svg>
+                    </a>
+                </div>
+                <div class="footer-copyright">
+                    <p class="copyright-text">© 2024 <span>SHOP.CO</span>. Todos
+                        los derechos reservados.</p>
+                </div>
+            </div>
+        </footer>
+
+        <div class="productos-container">
+            <h2>Productos</h2>
+            <button id="btnAgregarProducto">Agregar Producto</button>
+
+            <div id="loading" style="display: none;">Cargando productos...</div>
+            <div id="error" style="display: none;"></div>
+
+            <div class="productos-grid">
+                <!-- Los productos se cargarán aquí dinámicamente -->
+            </div>
+        </div>
+
+        <!-- Scripts -->
+        <script type="module">
+            import { requireAuth, trackUserAction, trackPageView } from './js/auth-guard.js';
+            
+            // Verificar autenticación al cargar la página
+            document.addEventListener('DOMContentLoaded', async () => {
+                const isAuthenticated = await requireAuth();
+                
+                if (isAuthenticated) {
+                    // Registrar vista de página
+                    trackPageView('Página Principal');
+                    
+                    // Configurar eventos de seguimiento
+                    setupTrackingEvents();
+                }
+            });
+            
+            // Configurar eventos de seguimiento
+            function setupTrackingEvents() {
+                // Botón de explorar
+                document.getElementById('explorar-btn').addEventListener('click', () => {
+                    trackUserAction('explore_button_clicked');
+                });
+                
+                // Productos
+                document.querySelectorAll('.product-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const productId = card.getAttribute('data-product-id');
+                        const productName = card.querySelector('h3').textContent;
+                        
+                        trackUserAction('product_clicked', {
+                            product_id: productId,
+                            product_name: productName
+                        });
+                    });
+                });
+                
+                // Estilos de vestimenta
+                document.querySelectorAll('.style-card').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const style = card.getAttribute('data-style');
+                        
+                        trackUserAction('style_clicked', {
+                            style: style
+                        });
+                        
+                        // Redirigir a la página de productos con el filtro de estilo
+                        window.location.href = `productos.html?estilo=${style}`;
+                    });
+                });
+                
+                // Enlaces sociales
+                document.querySelectorAll('.social-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const platform = link.querySelector('svg').getAttribute('viewBox').includes('23 3') ? 'twitter' : 
+                                        link.querySelector('svg').getAttribute('viewBox').includes('18 2') ? 'facebook' : 
+                                        link.querySelector('svg').getAttribute('viewBox').includes('rect x="2"') ? 'instagram' : 'github';
+                        
+                        trackUserAction('social_link_clicked', {
+                            platform: platform
+                        });
+                    });
+                });
+                
+                // Cerrar barra de promoción
+                document.querySelector('.close-button').addEventListener('click', () => {
+                    document.querySelector('.promo-bar').style.display = 'none';
+                    trackUserAction('promo_bar_closed');
+                });
+                
+                // Enlace de registro
+                document.querySelector('.sign-up-link').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    trackUserAction('sign_up_link_clicked');
+                    window.location.href = 'login.html';
+                });
+            }
+        </script>
+        <script type="module" src="js/firebase-config.js"></script>
+        <script type="module" src="js/navbar-loader.js"></script>
+    </body>
+
+</html>
