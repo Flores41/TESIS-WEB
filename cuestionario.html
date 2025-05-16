@@ -12,58 +12,206 @@
             margin: 2rem auto;
             padding: 2rem;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(44,62,80,0.13);
+            position: relative;
+        }
+        .cuestionario-container h1 {
+            font-size: 2.6rem;
+            font-family: 'Montserrat', Arial, sans-serif;
+            color: #111;
+            font-weight: 900;
+            letter-spacing: -1px;
+            margin-bottom: 0.7rem;
+            text-shadow: 0 2px 12px #1112;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+        .cuestionario-container h1::before {
+            content: '\1F4DD'; /* 📝 */
+            font-size: 2.2rem;
+            margin-right: 0.2em;
+        }
+        .cuestionario-container p[style*="Importante"] {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.7rem;
+            background: linear-gradient(90deg, #ededed 60%, #f1f1f1 100%);
+            border-left: 6px solid #111;
+            box-shadow: 0 2px 12px #1111;
+            font-size: 1.08rem;
+            color: #222;
+        }
+        .cuestionario-container p[style*="Importante"]::before {
+            content: '\2139'; /* ℹ️ */
+            font-size: 1.5rem;
+            color: #111;
+            margin-top: 0.1em;
+        }
+        .escala-info {
+            background: #ededed;
+            padding: 1.2rem 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            border-left: 5px solid #111;
+            box-shadow: 0 2px 8px #1111;
+        }
+        .escala-info h3 {
+            color: #111;
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin-bottom: 0.7rem;
         }
         .dimension-section {
-            margin-bottom: 2rem;
-            padding: 1.5rem;
-            background: #f8f9fa;
-            border-radius: 8px;
+            margin-bottom: 2.2rem;
+            padding: 1.7rem 1.2rem 1.2rem 1.2rem;
+            background: linear-gradient(90deg, #f6f6f6 80%, #ededed 100%);
+            border-radius: 14px;
+            box-shadow: 0 4px 18px #1111;
+            /* border-left: 7px solid #2563eb; */
+            transition: box-shadow 0.3s, border-color 0.3s;
+            position: relative;
+        }
+        .dimension-section:hover {
+            box-shadow: 0 8px 32px #1112;
+            /* border-left: 7px solid #60a5fa; */
         }
         .dimension-title {
-            color: #2c3e50;
-            margin-bottom: 1rem;
+            color: #111;
+            margin-bottom: 1.1rem;
+            font-size: 1.25rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .dimension-title::before {
+            content: '\1F4C8'; /* 📈 */
             font-size: 1.2rem;
-            font-weight: 600;
+            color: #111;
         }
         .pregunta-item {
-            margin-bottom: 1.5rem;
-            padding: 1rem;
-            background: white;
-            border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 1.2rem;
+            padding: 1.1rem 1.2rem;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #1111;
+            /* border-left: 5px solid #60a5fa; */
+            transition: box-shadow 0.2s, border-color 0.2s;
+            position: relative;
+        }
+        .pregunta-item:nth-child(even) {
+            background: #f8fafc;
+            /* border-left: 5px solid #a78bfa; */
+        }
+        .pregunta-item:hover {
+            box-shadow: 0 4px 16px #1112;
+            /* border-left: 5px solid #2563eb; */
+        }
+        .pregunta-item p {
+            font-size: 1.08rem;
+            color: #222;
+            font-weight: 600;
+            margin-bottom: 0.7rem;
         }
         .likert-options {
             display: flex;
             justify-content: space-between;
             margin-top: 0.5rem;
-            gap: 1rem;
+            gap: 1.2rem;
         }
         .likert-option {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.3rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #111;
+            cursor: pointer;
+            transition: color 0.2s;
         }
-        .demograficos {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 2rem;
+        .likert-option input[type="radio"] {
+            appearance: none;
+            width: 2.1em;
+            height: 2.1em;
+            border: 2.5px solid #111;
+            border-radius: 50%;
+            background: #fff;
+            transition: border 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px #1111;
+            margin-bottom: 0.2em;
+            cursor: pointer;
+            outline: none;
+            position: relative;
+        }
+        .likert-option input[type="radio"]:checked {
+            border: 2.5px solid #111;
+            background: radial-gradient(circle at 50% 50%, #111 60%, #444 100%);
+            box-shadow: 0 4px 16px #1112;
+        }
+        .likert-option input[type="radio"]:hover {
+            border: 2.5px solid #444;
+            box-shadow: 0 2px 12px #4442;
+        }
+        .likert-option label, .likert-option span {
+            font-size: 1.1rem;
+            color: #111;
+            font-weight: 600;
+        }
+        .likert-option input[type="radio"]:focus {
+            outline: 2px solid #111;
         }
         .submit-btn {
-            background: #007bff;
+            background: linear-gradient(90deg, #111 60%, #444 100%);
             color: white;
-            padding: 1rem 2rem;
+            padding: 1.1rem 2.5rem;
             border: none;
-            border-radius: 25px;
-            font-size: 1rem;
+            border-radius: 30px;
+            font-size: 1.15rem;
+            font-weight: 800;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 2rem;
+            margin-top: 2.2rem;
+            box-shadow: 0 4px 18px #1112;
+            transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+            outline: none;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
         }
         .submit-btn:hover {
-            background: #0056b3;
+            background: linear-gradient(90deg, #444 0%, #111 100%);
+            color: #fff;
+            transform: translateY(-2px) scale(1.04);
+            box-shadow: 0 8px 32px #1112;
+        }
+        .submit-btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 2px 8px #1111;
+        }
+        @media (max-width: 900px) {
+            .cuestionario-container {
+                padding: 1rem;
+            }
+            .dimension-section {
+                padding: 1.2rem 0.7rem 0.7rem 0.7rem;
+            }
+        }
+        @media (max-width: 600px) {
+            .cuestionario-container h1 {
+                font-size: 1.5rem;
+            }
+            .dimension-title {
+                font-size: 1.05rem;
+            }
+            .pregunta-item p {
+                font-size: 0.98rem;
+            }
+            .submit-btn {
+                font-size: 1rem;
+                padding: 0.8rem 1.2rem;
+            }
         }
         .resultados-container {
             margin-top: 3rem;
@@ -91,6 +239,57 @@
         .escala-info li {
             margin: 0.5rem 0;
         }
+        .demograficos {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem 2.5rem;
+            margin-top: 2rem;
+            background: linear-gradient(90deg, #f6f6f6 80%, #ededed 100%);
+            border-radius: 14px;
+            box-shadow: 0 4px 18px #1111;
+            padding: 2rem 1.5rem 1.5rem 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+        .demograficos div {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .demograficos p {
+            font-size: 1.08rem;
+            font-weight: 700;
+            color: #111;
+            margin-bottom: 0.2rem;
+        }
+        .demograficos select {
+            padding: 0.7rem 2.2rem 0.7rem 1rem;
+            border: 2px solid #ededed;
+            border-radius: 8px;
+            background: #fff;
+            font-size: 1.05rem;
+            color: #222;
+            box-shadow: 0 2px 8px #1111;
+            transition: border 0.2s, box-shadow 0.2s;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.8rem center;
+            background-size: 1.2rem;
+        }
+        .demograficos select:focus {
+            border: 2px solid #111;
+            box-shadow: 0 4px 16px #1112;
+            outline: none;
+        }
+        .demograficos select:hover {
+            border: 2px solid #444;
+        }
+        @media (max-width: 900px) {
+            .demograficos {
+                grid-template-columns: 1fr;
+                padding: 1.2rem 0.7rem 0.7rem 0.7rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -105,7 +304,9 @@
 
     <div class="cuestionario-container">
         <h1>Cuestionario de Investigación</h1>
-        <p><strong>Título de tesis:</strong> Modelo de recomendación personalizado mediante técnica de indexación de datos para mejorar la experiencia de usuario. Caso: Outfit, Arequipa 2024</p>
+        <p style="font-size:1.08rem; background:#f6f8fa; border-radius:7px; padding:1rem 1.5rem; margin-bottom:1.5rem;">
+            <strong>Importante:</strong> Su participación en este cuestionario es completamente voluntaria y anónima. Todos los datos recolectados serán utilizados exclusivamente con fines educativos y de investigación académica, y no serán compartidos con terceros bajo ninguna circunstancia. La información proporcionada será tratada con estricta confidencialidad y de acuerdo con la normativa vigente sobre protección de datos personales. Los resultados se analizarán de forma agregada, garantizando que ninguna respuesta individual pueda ser identificada. Si tiene alguna duda sobre el uso de sus datos, puede comunicarse con los investigadores.
+        </p>
         
         <div class="escala-info">
             <h3>Escala tipo Likert:</h3>
@@ -383,141 +584,6 @@
 
             <button type="submit" class="submit-btn">Enviar Respuestas</button>
         </form>
-
-        <div class="resultados-container">
-            <div class="grafico-card">
-                <canvas id="calidadChart"></canvas>
-            </div>
-            <div class="grafico-card">
-                <canvas id="personalizacionChart"></canvas>
-            </div>
-            <div class="grafico-card">
-                <canvas id="diversidadChart"></canvas>
-            </div>
-            <div class="grafico-card">
-                <canvas id="iaChart"></canvas>
-            </div>
-            <div class="grafico-card">
-                <canvas id="indexacionChart"></canvas>
-            </div>
-            <div class="grafico-card">
-                <canvas id="usabilidadChart"></canvas>
-            </div>
-            <div class="grafico-card">
-                <canvas id="satisfaccionChart"></canvas>
-            </div>
-            <div class="grafico-card">
-                <canvas id="fidelizacionChart"></canvas>
-            </div>
-            <div class="grafico-card">
-                <canvas id="demograficosChart"></canvas>
-            </div>
-        </div>
-
-        <!-- --- ESTILOS MEJORADOS PARA TABLA Y PANEL ---
-        const style2 = document.createElement('style');
-        style2.innerHTML = `
-        #panel-respuestas-individual, #tabla-respuestas-individual {
-            background: #f8f9fa;
-            border-radius: 16px;
-            box-shadow: 0 2px 12px rgba(44,62,80,0.09);
-            padding: 2.5rem 2rem;
-            margin-bottom: 2.5rem;
-        }
-        #panel-respuestas-individual h2, #tabla-respuestas-individual h2 {
-            color: #2563eb;
-            font-size: 1.5rem;
-            margin-bottom: 1.2rem;
-            font-weight: 800;
-            letter-spacing: 0.5px;
-        }
-        #panel-respuestas-individual label {
-            font-weight: 600;
-            color: #34495e;
-            font-size: 1.1rem;
-        }
-        #panel-respuestas-individual select {
-            border-radius: 8px;
-            border: 1.5px solid #d1d5db;
-            padding: 0.5rem 1.2rem;
-            font-size: 1.05rem;
-            margin-left: 0.7rem;
-            background: #fff;
-            transition: border 0.2s;
-        }
-        #panel-respuestas-individual select:focus {
-            border: 2px solid #2563eb;
-            outline: none;
-        }
-        #respuestas-usuario-detalle ul {
-            list-style: none;
-            padding: 0;
-            margin: 1.2rem 0 0 0;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1.2rem;
-        }
-        #respuestas-usuario-detalle li {
-            background: #fff;
-            border-radius: 10px;
-            margin-bottom: 0.5rem;
-            padding: 1rem 1.3rem;
-            box-shadow: 0 1px 4px rgba(44,62,80,0.07);
-            border-left: 5px solid #2563eb;
-            min-width: 260px;
-            max-width: 350px;
-            flex: 1 1 260px;
-            font-size: 1.05rem;
-        }
-        #respuestas-usuario-detalle strong {
-            color: #2563eb;
-        }
-        #tabla-respuestas-individual table {
-            width: 100%;
-            border-radius: 12px;
-            overflow: hidden;
-            background: #fff;
-            box-shadow: 0 1px 8px rgba(44,62,80,0.08);
-            border-spacing: 0;
-        }
-        #tabla-respuestas-individual th, #tabla-respuestas-individual td {
-            padding: 0.9rem 0.7rem;
-            text-align: center;
-            font-size: 1.01rem;
-            max-width: 220px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        #tabla-respuestas-individual th {
-            background: #e3eafc;
-            color: #1e293b;
-            font-weight: 700;
-            border-bottom: 2px solid #d1d5db;
-            position: sticky;
-            top: 0;
-            z-index: 2;
-        }
-        #tabla-respuestas-individual tr {
-            transition: background 0.2s;
-        }
-        #tabla-respuestas-individual tr:nth-child(even) {
-            background: #f3f6fb;
-        }
-        #tabla-respuestas-individual tr:nth-child(odd) {
-            background: #fff;
-        }
-        #tabla-respuestas-individual tr:hover {
-            background: #e0e7ff;
-        }
-        #tabla-respuestas-individual td {
-            border-bottom: 1px solid #f0f0f0;
-        }
-        #tabla-respuestas-individual tr:last-child td {
-            border-bottom: none;
-        }
-        `;
-        document.head.appendChild(style2); -->
     </div>
 
     <script type="module">
@@ -552,6 +618,7 @@
 
         import { db, auth } from './js/firebase-config.js';
         import { collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         // Objeto para almacenar las instancias de los gráficos
         let charts = {
@@ -624,12 +691,44 @@
             ctx.restore();
         }
 
+        // Notificación flotante para login
+        function showLoginNotification() {
+          if (document.getElementById('login-notification')) return;
+          const notif = document.createElement('div');
+          notif.className = 'floating-notification';
+          notif.id = 'login-notification';
+          notif.innerHTML = `
+            <div class="notif-icon">
+              <svg width="54" height="54" viewBox="0 0 54 54" fill="none"><circle cx="27" cy="27" r="27" fill="#000"/><rect x="15" y="26" width="24" height="16" rx="4" fill="#000"/><rect x="21" y="18" width="12" height="12" rx="6" fill="#fff" stroke="#fff" stroke-width="2"/><rect x="24.5" y="34" width="5" height="6" rx="2.5" fill="#fff"/></svg>
+            </div>
+            <span>Debes iniciar sesión para responder el cuestionario.</span>
+            <button onclick="window.location.href='login.html'">Iniciar sesión</button>
+          `;
+          document.body.appendChild(notif);
+        }
+
+        function setFormEnabled(enabled) {
+          const form = document.getElementById('cuestionario-form');
+          Array.from(form.elements).forEach(el => {
+            el.disabled = !enabled;
+          });
+        }
+
+        onAuthStateChanged(auth, (user) => {
+          if (!user) {
+            showLoginNotification();
+            setFormEnabled(false);
+          } else {
+            setFormEnabled(true);
+            const notif = document.getElementById('login-notification');
+            if (notif) notif.remove();
+          }
+        });
+
         // Función para enviar respuestas
         document.getElementById('cuestionario-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             if (!auth.currentUser) {
-                alert('Debe iniciar sesión para enviar el cuestionario');
                 return;
             }
 

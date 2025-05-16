@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gemini IA - Chat de Outfits</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Gemini SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@google/generative-ai/dist/index.umd.js"></script>
+  <!-- Firebase SDK (compat scripts eliminados) -->
+  <link rel="stylesheet" href="css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* Variables globales */
+    :root {
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg-color: #f8fafc;
+      --chat-bg: #ffffff;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --border-color: #e2e8f0;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+      --gradient-primary: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      --gradient-hover: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    }
+
+    body {
+      background: var(--bg-color);
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+
+    /* Ajuste para el navbar general */
+    .navbar-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+    }
+
+    /* Chat container más amplio y moderno */
+    #chat-container {
+      display: flex;
+      flex-direction: row;
+      height: 90vh;
+      min-height: 500px;
+      max-width: 1200px;
+      margin: 100px auto 2rem;
+      background: rgba(255,255,255,0.97);
+      border-radius: 20px;
+      box-shadow: 0 6px 32px #0002, 0 1.5px 8px #fff2;
+      border: 1.5px solid #e2e8f0;
+      overflow: hidden;
+    }
+
+    #chat-main {
+      flex: 1 1 0;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    #chat-history {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      padding: 2rem;
+      background: var(--bg-color);
+    }
+
+    #chat-form, #borrar-historial {
+      /* Asegúrate que NO estén dentro de #chat-history */
+    }
+
+    #product-search-sidebar {
+      position: sticky;
+      top: 0;
+      align-self: flex-start;
+      height: 100%;
+      min-width: 260px;
+      max-width: 350px;
+      overflow-y: auto;
+      background: #f8fafc;
+      border-radius: 18px;
+      box-shadow: 0 2px 12px #0001;
+      padding: 1.2rem 1rem 1.2rem 1rem !important;
+      margin: 0;
+      border: 1.5px solid #e2e8f0;
+    }
+
+    @media (max-width: 900px) {
+      #chat-container {
+        flex-direction: column;
+        width: 99vw;
+        max-width: 99vw;
+        gap: 1.2rem;
+        margin: 1rem auto;
+        border-radius: 0;
+        height: 100vh;
+      }
+      #product-search-sidebar {
+        position: static;
+        max-width: 100vw;
+        min-width: 0;
+        border-radius: 0 0 18px 18px;
+        margin: 0;
+        height: auto;
+      }
+    }
+
+    .msg {
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+      word-break: break-word;
+      max-width: 85%;
+      opacity: 0;
+      animation: fadeInMsg 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      position: relative;
+      transform-origin: center;
+    }
+
+    .msg.usuario {
+      text-align: right;
+      color: white;
+      background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
+      border-radius: 20px 20px 4px 20px;
+      padding: 1rem 1.25rem;
+      margin-left: auto;
+      margin-right: 0;
+      box-shadow: var(--shadow-sm);
+      font-weight: 500;
+      display: inline-block;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      animation: slideInRight 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    .msg.gemini {
+      text-align: left;
+      color: var(--text-primary);
+      background: white;
+      border-radius: 20px 20px 20px 4px;
+      padding: 1rem 1.25rem;
+      margin-right: auto;
+      margin-left: 0;
+      box-shadow: var(--shadow-sm);
+      font-weight: 500;
+      display: inline-block;
+      border: 1px solid var(--border-color);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      animation: slideInLeft 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .reco-imgs {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      animation: fadeIn 0.5s ease-out forwards;
+      animation-delay: 0.3s;
+      opacity: 0;
+    }
+
+    .reco-imgs img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 2px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      background: white;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      animation: scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      opacity: 0;
+    }
+
+    .reco-imgs img:nth-child(1) { animation-delay: 0.4s; }
+    .reco-imgs img:nth-child(2) { animation-delay: 0.5s; }
+    .reco-imgs img:nth-child(3) { animation-delay: 0.6s; }
+    .reco-imgs img:nth-child(4) { animation-delay: 0.7s; }
+    .reco-imgs img:nth-child(5) { animation-delay: 0.8s; }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    #chat-form {
+      display: flex;
+      border-top: 1px solid var(--border-color);
+      background: white;
+      padding: 1.25rem;
+      gap: 0.75rem;
+      position: relative;
+      animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #chat-input {
+      flex: 1;
+      border: 2px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1rem 1.25rem;
+      font-size: 1rem;
+      background: var(--bg-color);
+      outline: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      color: var(--text-primary);
+    }
+
+    #chat-input:focus {
+      border-color: #333;
+      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
+
+    #chat-input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    #chat-form button {
+      background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      padding: 1rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #chat-form button:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: var(--shadow-md);
+    }
+
+    #chat-form button:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(0, 0, 0, 0.1);
+      border-top: 2px solid #333;
+      border-radius: 50%;
+      animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+
+    /* Mejorar el loader de puntos */
+    .dot-loader {
+      display: inline-block;
+      position: relative;
+      width: 60px;
+      height: 20px;
+    }
+
+    .dot-loader div {
+      position: absolute;
+      top: 8px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #333;
+      animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .dot-loader div:nth-child(1) {
+      left: 6px;
+      animation: dot-loader1 0.8s infinite;
+    }
+
+    .dot-loader div:nth-child(2) {
+      left: 24px;
+      animation: dot-loader2 0.8s infinite;
+    }
+
+    .dot-loader div:nth-child(3) {
+      left: 42px;
+      animation: dot-loader3 0.8s infinite;
+    }
+
+    @keyframes dot-loader1 {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(0); opacity: 0; }
+    }
+
+    @keyframes dot-loader2 {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(0); opacity: 0; }
+    }
+
+    @keyframes dot-loader3 {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(0); opacity: 0; }
+    }
+
+    /* Botón borrar historial elegante */
+    #borrar-historial {
+      background: linear-gradient(90deg, #ff4b4b 0%, #ff6b6b 100%);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 0.7rem 1.5rem;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #ff4b4b22;
+      margin: 0.5rem 0 0 0;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      float: right;
+    }
+    #borrar-historial:hover {
+      background: linear-gradient(90deg, #ff6b6b 0%, #ff4b4b 100%);
+      box-shadow: 0 4px 16px #ff4b4b33;
+      transform: translateY(-2px) scale(1.04);
+    }
+    #borrar-historial::before {
+      content: "🗑️";
+      font-size: 1.1em;
+      margin-right: 0.4em;
+    }
+
+    /* Sidebar búsqueda más compacto y moderno */
+    #product-search-sidebar {
+      background: #f8fafc;
+      border-radius: 18px;
+      box-shadow: 0 2px 12px #0001;
+      padding: 1.2rem 1rem 1.2rem 1rem !important;
+      min-width: 260px;
+      max-width: 350px;
+      margin: 0;
+      border: 1.5px solid #e2e8f0;
+    }
+    #product-search-sidebar h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #222;
+      margin-bottom: 0.7rem;
+      letter-spacing: 0.5px;
+    }
+    #product-search-input {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      border-radius: 10px;
+      border: 1.5px solid #e2e8f0;
+      font-size: 1rem;
+      margin-bottom: 0.7rem;
+      background: #fff;
+      box-shadow: 0 1.5px 8px #0001;
+      transition: border 0.2s;
+    }
+    #product-search-input:focus {
+      border-color: #2563eb;
+    }
+    #product-search-results > div {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px #0001;
+      padding: 0.7rem 0.8rem;
+      margin-bottom: 0.7rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: box-shadow 0.2s, border 0.2s;
+      border: 1px solid #e2e8f0;
+    }
+    #product-search-results > div:hover {
+      box-shadow: 0 4px 16px #2563eb22;
+      border: 1.5px solid #2563eb;
+    }
+    #product-search-results img {
+      width: 56px;
+      height: 56px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1.5px solid #e2e8f0;
+      background: #fff;
+    }
+
+    /* Responsive: chat ocupa más ancho en móvil */
+    @media (max-width: 768px) {
+      html, body {
+        height: 100%;
+        min-height: 100%;
+        overflow-y: auto !important;
+      }
+      #chat-container {
+        min-height: 100vh;
+        height: 100vh !important;
+        max-height: 100vh !important;
+      }
+      #chat-history {
+        flex: 1 1 auto;
+        min-height: 200px;
+        max-height: 70vh;
+        overflow-y: auto;
+      }
+      #chat-container {
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+        margin: 0;
+        height: 100vh;
+        border-radius: 0;
+        max-width: 100%;
+      }
+      #chat-history {
+        padding: 1rem;
+      }
+      #chat-form {
+        padding: 1rem;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      #chat-form button, #chat-input {
+        width: 100%;
+        box-sizing: border-box;
+      }
+      #borrar-historial {
+        width: 100%;
+        margin: 1rem 0 0 0 !important;
+        border-radius: 16px;
+      }
+      aside#product-search-sidebar {
+        flex-shrink: 0;
+      }
+      aside#product-search-sidebar > div[style*="position: absolute"] {
+        display: none !important;
+      }
+      .msg {
+        max-width: 90%;
+      }
+      .reco-imgs img {
+        width: 80px;
+        height: 80px;
+      }
+      .navbar {
+        padding: 1rem;
+      }
+      .navbar-brand {
+        font-size: 1.1rem;
+      }
+      .navbar-nav {
+        gap: 1rem;
+      }
+      .nav-link {
+        padding: 0.5rem;
+      }
+    }
+
+    /* Animación para el loader de puntos */
+    .dot-loader {
+      display: inline-block;
+      position: relative;
+      width: 60px;
+      height: 20px;
+    }
+
+    .dot-loader div {
+      position: absolute;
+      top: 8px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      animation-timing-function: cubic-bezier(0, 1, 1, 0);
+    }
+
+    .dot-loader div:nth-child(1) {
+      left: 6px;
+      animation: dot-loader1 0.6s infinite;
+    }
+
+    .dot-loader div:nth-child(2) {
+      left: 24px;
+      animation: dot-loader2 0.6s infinite;
+    }
+
+    .dot-loader div:nth-child(3) {
+      left: 42px;
+      animation: dot-loader3 0.6s infinite;
+    }
+
+    @keyframes dot-loader1 {
+      0% { transform: scale(0); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes dot-loader2 {
+      0% { transform: scale(1); }
+      100% { transform: scale(0.5); }
+    }
+
+    @keyframes dot-loader3 {
+      0% { transform: scale(0.5); }
+      100% { transform: scale(1); }
+    }
+
+    /* Notificación flotante mejorada */
+    .floating-notification {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.95);
+      background: var(--gradient-primary);
+      color: white;
+      padding: 2rem 2.5rem;
+      border-radius: 1.2rem;
+      box-shadow: var(--shadow-lg);
+      font-size: 1.2rem;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      min-width: 320px;
+      max-width: 90vw;
+      text-align: center;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      animation: notifBounceIn 0.9s cubic-bezier(.22,1.5,.36,1) both;
+      backdrop-filter: blur(10px);
+    }
+
+    .floating-notification button {
+      background: white;
+      color: var(--primary-color);
+      border: none;
+      border-radius: 12px;
+      padding: 0.8rem 2rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      box-shadow: var(--shadow-md);
+      transition: all 0.3s ease;
+    }
+
+    .floating-notification button:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+      background: var(--bg-color);
+    }
+
+    @keyframes notifBounceIn {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.7);}
+      60% { opacity: 1; transform: translate(-50%, -50%) scale(1.08);}
+      80% { transform: translate(-50%, -50%) scale(0.96);}
+      100% { opacity: 1; transform: translate(-50%, -50%) scale(1);}
+    }
+  </style>
+</head>
+<body>
+  <!-- Contenedor para el navbar general -->
+  <div class="navbar-container"></div>
+
+  <div id="chat-container">
+    <div id="chat-main">
+      <div id="chat-history"></div>
+      <div id="chat-loader" style="display:none; text-align:center; margin-top:2rem;">
+        <div class="dot-loader">
+          <div></div><div></div><div></div>
+        </div>
+        <div style="color:#888; margin-top: 0.5rem;">Cargando historial...</div>
+      </div>
+      <form id="chat-form" autocomplete="off">
+        <input type="text" id="chat-input" placeholder="Escribe tu mensaje..." autocomplete="off" />
+        <button type="submit">Enviar</button>
+      </form>
+      <button id="borrar-historial" style="margin: 1rem auto 0; display: block; background: #e53e3e; color: white; border: none; border-radius: 8px; padding: 0.5rem 1.5rem; font-weight: 600; cursor: pointer;">Borrar historial</button>
+    </div>
+    <aside id="product-search-sidebar" style="width: 340px; min-width: 240px; max-width: 100vw; background: linear-gradient(135deg, #f8fafc 60%, #e9ecef 100%); border-radius: 22px; border-left: none; box-shadow: 0 8px 32px #0002, 0 1.5px 8px #fff2; padding: 2.2rem 1.5rem 2rem 1.5rem; display: flex; flex-direction: column; gap: 1.2rem; align-items: stretch; margin-left: 0; margin-top: 1.5rem; margin-bottom: 1.5rem; position: relative;">
+      <div style="position: absolute; left: -1.5rem; top: 0; bottom: 0; width: 1.5rem; display: flex; align-items: center; justify-content: center;">
+        <div style="width: 2px; height: 80%; background: linear-gradient(180deg, #e2e8f0 0%, #cbd5e1 100%); border-radius: 2px;"></div>
+      </div>
+      <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: #222; letter-spacing: 0.5px;">🔎 Buscar producto</h3>
+      <div style="color: #444; font-size: 0.98rem; margin-bottom: 0.7rem; background: #f3f6fa; border-radius: 10px; padding: 0.7rem 1rem; box-shadow: 0 1px 4px #0001;">
+        ¿Buscas una prenda recomendada por la IA? <br>
+        <span style="color:#2563eb; font-weight:500;">Escribe el nombre aquí para ver su imagen y detalles al instante.</span>
+      </div>
+      <input id="product-search-input" type="text" placeholder="Nombre del producto..." style="padding: 0.9rem 1.1rem; border-radius: 14px; border: 1.5px solid #e2e8f0; font-size: 1.05rem; outline: none; margin-bottom: 0.7rem; background: #fff; box-shadow: 0 1.5px 8px #0001; transition: border 0.2s;" />
+      <div id="product-search-results" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 1.1rem;"></div>
+    </aside>
+  </div>
+
+  <!-- Script para soporte Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- Script para cargar el navbar general -->
+  <script src="js/navbar-loader.js"></script>
+  <script type="module">
+    import { db, auth } from './js/firebase-config.js';
+    import { collection, getDocs, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // 2. Configura tu API KEY de Gemini aquí:
+    const GEMINI_API_KEY = 'AIzaSyA0PkP6I-6U8Rob-i7_kJmKex6d3fePkDg'; // PON TU API KEY AQUÍ
+
+    // 3. Carga productos desde Firebase (colecciones shombre y smujer)
+    let productos = [];
+    let productosCargados = false;
+    let currentUser = null;
+
+    // Función para obtener el nombre del usuario
+    function getUserDisplayName() {
+      if (currentUser) {
+        return currentUser.displayName || currentUser.email || 'Usuario';
+      }
+      return 'Usuario';
+    }
+
+    // Observar cambios en la autenticación
+    auth.onAuthStateChanged((user) => {
+      currentUser = user;
+    });
+
+    async function cargarProductos() {
+      productos = [];
+      const shombreSnapshot = await getDocs(collection(db, 'shombre'));
+      shombreSnapshot.forEach(doc => {
+        const p = doc.data();
+        productos.push({
+          nombre: (p.nombre || '').toLowerCase(),
+          categoria: p.categoria || '',
+          genero: 'Hombre',
+          color: p.color || '',
+          imagen: p.imagen || ''
+        });
+      });
+      const smujerSnapshot = await getDocs(collection(db, 'smujer'));
+      smujerSnapshot.forEach(doc => {
+        const p = doc.data();
+        productos.push({
+          nombre: (p.nombre || '').toLowerCase(),
+          categoria: p.categoria || '',
+          genero: 'Mujer',
+          color: p.color || '',
+          imagen: p.imagen || ''
+        });
+      });
+      productosCargados = true;
+    }
+
+    // Guarda el historial en Firestore
+    async function guardarConversacion(uid, chatHistory) {
+      await setDoc(doc(db, "conversaciones", uid), { chatHistory });
+    }
+
+    // Carga el historial desde Firestore
+    async function cargarConversacion(uid) {
+      const docSnap = await getDoc(doc(db, "conversaciones", uid));
+      if (docSnap.exists()) {
+        return docSnap.data().chatHistory || [];
+      }
+      return [];
+    }
+
+    // 4. Chat logic
+    const chatHistory = [];
+    const chatHistoryDiv = document.getElementById('chat-history');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    let isLoading = false;
+
+    // Función para obtener la hora formateada
+    function formatTime(ts) {
+      if (!ts) return '';
+      const d = new Date(ts);
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    const chatLoader = document.getElementById('chat-loader');
+
+    // Al detectar login, cargar historial
+    auth.onAuthStateChanged(async (user) => {
+      currentUser = user;
+      if (user) {
+        chatLoader.style.display = 'block';
+        chatHistoryDiv.style.display = 'none';
+        chatHistory.length = 0; // Limpia el historial actual
+        const historialGuardado = await cargarConversacion(user.uid);
+        historialGuardado.forEach(m => chatHistory.push(m));
+        renderChat();
+        chatLoader.style.display = 'none';
+        chatHistoryDiv.style.display = '';
+        
+        // Asegurar el scroll después de que se muestre el historial
+        setTimeout(() => {
+          chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
+        }, 200);
+      }
+    });
+
+    function renderChat() {
+      chatHistoryDiv.innerHTML = chatHistory.map(msg => {
+        const hora = msg.timestamp ? `<span style='color:#888;font-size:0.85em;margin-left:8px;'>${formatTime(msg.timestamp)}</span>` : '';
+        if (msg.sender === 'Gemini') {
+          if (msg.recomendaciones && Array.isArray(msg.recomendaciones)) {
+            return msg.recomendaciones.map(reco => {
+              let imgs = '';
+              if (reco.recoImgs && reco.recoImgs.length) {
+                imgs = `<div class=\"reco-imgs\">` + reco.recoImgs.map(url =>
+                  `<img src=\"${url}\" alt=\"Producto recomendado\">`
+                ).join('') + `</div>`;
+              }
+              return `<div class=\"msg gemini\"><b>Gemini:</b> ${window.marked.parse(reco.text)}${imgs}${hora}</div>`;
+            }).join('');
+          }
+          let imgs = '';
+          if (msg.recoImgs && msg.recoImgs.length) {
+            imgs = `<div class=\"reco-imgs\">` + msg.recoImgs.map(url =>
+              `<img src=\"${url}\" alt=\"Producto recomendado\">`
+            ).join('') + `</div>`;
+          }
+          return `<div class=\"msg gemini\"><b>Gemini:</b> ${window.marked.parse(msg.text)}${imgs}${hora}</div>`;
+        }
+        // Siempre usar la clase 'usuario' para los mensajes del usuario
+        return `<div class=\"msg usuario\"><b>${msg.sender}:</b> ${msg.text}${hora}</div>`;
+      }).join('');
+      if (isLoading) {
+        chatHistoryDiv.innerHTML += `<div class=\"msg gemini\"><span class=\"loading\"></span> <span style=\"color:#888;\">Gemini está escribiendo...</span></div>`;
+      }
+      // Añadir un pequeño retraso para asegurar que el contenido se haya renderizado
+      setTimeout(() => {
+        chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
+      }, 100);
+    }
+
+    function normalizarTexto(str) {
+      return str
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // quita tildes
+        .replace(/[^a-z0-9 ]/g, '') // quita caracteres raros
+        .replace(/\s+/g, ' ') // espacios simples
+        .trim();
+    }
+
+    function extraerImagenesDeProductosSoloLista(recomendacion) {
+      const imgs = [];
+      const lineas = recomendacion.split('\n');
+      lineas.forEach(linea => {
+        // Busca líneas tipo: * Nombre producto: ...
+        const match = linea.match(/^\*\s*([^:]+)/);
+        if (match) {
+          const nombreLinea = normalizarTexto(match[1]);
+          // Busca el producto cuyo nombre normalizado esté contenido en la línea
+          const producto = productos.find(p => {
+            const nombreProd = normalizarTexto(p.nombre);
+            // console.log('Comparando:', nombreLinea, 'con', nombreProd);
+            return nombreLinea.includes(nombreProd) || nombreProd.includes(nombreLinea);
+          });
+          if (producto && producto.imagen && !imgs.includes(producto.imagen)) {
+            imgs.push(producto.imagen);
+          }
+        }
+      });
+      return imgs;
+    }
+
+    // Nueva función para dividir recomendaciones y asociar imágenes
+    function procesarRecomendacionesGemini(respuesta) {
+      // Separar por '**Recomendación:**' (puedes ajustar el separador si Gemini responde diferente)
+      const partes = respuesta.text.split(/\*\*Recomendación:\*\*/).filter(Boolean);
+      return partes.map(parte => {
+        // Buscar imágenes solo para la lista de productos de esta parte
+        const recoImgs = extraerImagenesDeProductosSoloLista(parte);
+        return { text: parte.trim(), recoImgs };
+      });
+    }
+
+    // Notificación flotante para login
+    function showLoginNotification() {
+      if (document.getElementById('login-notification')) return;
+      const notif = document.createElement('div');
+      notif.className = 'floating-notification';
+      notif.id = 'login-notification';
+      notif.innerHTML = `
+        <span>Debes iniciar sesión para usar esta función.</span>
+        <button onclick="window.location.href='login.html'">Iniciar sesión</button>
+      `;
+      document.body.appendChild(notif);
+      setTimeout(() => {
+        if (notif) notif.remove();
+      }, 8000);
+    }
+
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentUser) {
+        showLoginNotification();
+        return;
+      }
+      if (!productosCargados) {
+        alert('Espera a que se carguen los productos antes de enviar un mensaje.');
+        return;
+      }
+      const userPrompt = chatInput.value.trim();
+      if (!userPrompt || isLoading) return;
+
+      // Usar el nombre del usuario actual en lugar de "Usuario"
+      const userName = getUserDisplayName();
+      const userMsg = { sender: userName, text: userPrompt, timestamp: Date.now() };
+      chatHistory.push(userMsg);
+      renderChat();
+
+      // Guardar historial si está logueado
+      if (currentUser) {
+        await guardarConversacion(currentUser.uid, chatHistory);
+      }
+
+      chatInput.value = '';
+      chatInput.disabled = true;
+      isLoading = true;
+      renderChat();
+
+      // Construir el prompt como en tu código Flutter
+      const productsList = productos.map(
+        p => `- ${capitalize(p.nombre)} (${p.categoria}, ${p.genero}, ${p.color})\n  Imagen: ${p.imagen}`
+      ).join('\n');
+
+      const chatHistoryText = chatHistory.map(m => `${m.sender}: ${m.text}`).join('\n');
+
+      const enhancedPrompt = `
+Eres un asistente de moda para una tienda online. 
+Esta aplicación es un chat donde los usuarios pueden:
+- Consultar sobre la tienda y sus productos.
+- Pedir recomendaciones de outfits usando el catálogo disponible.
+- Hacer preguntas generales sobre moda.
+- Consultar sobre el funcionamiento de la aplicación o la tienda.
+
+Si el usuario te saluda, responde amablemente y preséntate.
+Si el usuario hace una pregunta general sobre moda, respóndela de forma útil y breve.
+Si el usuario pregunta sobre la aplicación, la tienda o cómo funciona, explica que es un chat de asistencia de moda donde puede recibir recomendaciones personalizadas y resolver dudas sobre productos, moda y el uso de la tienda.
+Si el usuario pide recomendaciones de outfits, SOLO puedes recomendar outfits usando EXCLUSIVAMENTE los productos de la siguiente lista. NO inventes productos, marcas ni colores que no estén en la lista. Si el usuario pide algo que no está en la lista, responde solo con los productos disponibles.
+
+IMPORTANTE:
+- No repitas exactamente los mismos productos en cada outfit.
+- Varía las combinaciones y trata de no usar el mismo producto principal más de una vez por recomendación.
+- Si un producto es el foco (por ejemplo, "Polo blanco"), asegúrate de que los demás productos sean diferentes en cada outfit.
+- Cada outfit debe ser único y creativo.
+- **Incluye siempre emojis relevantes y amigables en tus respuestas para que el usuario se sienta más a gusto.**
+
+Si el usuario hace otra consulta, responde de forma natural y útil.
+
+Lista de productos disponibles:
+${productsList}
+
+Historial de conversación:
+${chatHistoryText}
+
+Usuario: ${userPrompt}
+
+Si das recomendaciones de outfit, responde con al menos 5 recomendaciones, cada una usando solo productos de la lista. Para cada recomendación, indica los nombres exactos de los productos usados (tal como aparecen en la lista) y justifica la elección. No inventes productos ni imágenes. Si puedes, sugiere combinaciones creativas solo con lo que hay.
+
+Formato de respuesta para recomendaciones:
+**Recomendación:** [detallada, usando solo productos de la lista]
+      `;
+
+      // Llama a Gemini IA
+      const geminiResponse = await fetchGeminiResponse(enhancedPrompt);
+
+      // Debug: mostrar productos cargados
+      console.log('Productos cargados:', productos);
+
+      // Procesar recomendaciones y asociar imágenes a cada una
+      const recomendaciones = procesarRecomendacionesGemini(geminiResponse);
+
+      const geminiMsg = { sender: 'Gemini', recomendaciones, timestamp: Date.now() };
+      chatHistory.push(geminiMsg);
+      isLoading = false;
+      renderChat();
+
+      // Guardar historial si está logueado
+      if (currentUser) {
+        await guardarConversacion(currentUser.uid, chatHistory);
+      }
+
+      chatInput.disabled = false;
+      chatInput.focus();
+    });
+
+    async function fetchGeminiResponse(prompt) {
+      try {
+        const url = "https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=" + GEMINI_API_KEY;
+        const body = {
+          contents: [{ parts: [{ text: prompt }] }]
+        };
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        // Extrae el texto de la respuesta
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "No se obtuvo respuesta de Gemini IA";
+        return { text: text.replace(/\n/g, '<br>') };
+      } catch (e) {
+        return { text: 'Error al conectar con Gemini IA: ' + e.message };
+      }
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    // Mensaje inicial y carga de productos
+    chatHistory.push({ sender: 'Gemini', text: '¡Hola! Soy tu asistente de moda. Escribe qué buscas y te recomendaré outfits con los productos de la tienda.' });
+    renderChat();
+    cargarProductos();
+
+    // Función para borrar historial de Firestore y frontend
+    async function borrarHistorial(uid) {
+      await deleteDoc(doc(db, "conversaciones", uid));
+      chatHistory.length = 0;
+      renderChat();
+    }
+
+    // Evento para el botón de borrar historial
+    document.getElementById('borrar-historial').addEventListener('click', async () => {
+      if (!currentUser) return;
+      if (confirm('¿Seguro que quieres borrar todo tu historial de chat?')) {
+        await borrarHistorial(currentUser.uid);
+      }
+    });
+
+    // --- Buscador de productos en la barra lateral ---
+    const productSearchInput = document.getElementById('product-search-input');
+    const productSearchResults = document.getElementById('product-search-results');
+
+    function renderProductResults(query) {
+      if (!productosCargados) {
+        productSearchResults.innerHTML = '<div style="color:#888;">Cargando productos...</div>';
+        return;
+      }
+      const q = (query || '').toLowerCase().trim();
+      let filtered = productos;
+      if (q) {
+        filtered = productos.filter(p => p.nombre.includes(q));
+      }
+      if (!filtered.length) {
+        productSearchResults.innerHTML = '<div style="color:#888;">No se encontraron productos.</div>';
+        return;
+      }
+      productSearchResults.innerHTML = filtered.map(p => `
+        <div style="display: flex; align-items: center; gap: 1rem; background: #f8fafc; border-radius: 12px; padding: 0.7rem 0.8rem; box-shadow: 0 2px 8px #0001;">
+          <img src="${p.imagen}" alt="${p.nombre}" style="width: 64px; height: 64px; object-fit: cover; border-radius: 10px; border: 1.5px solid #e2e8f0; background: #fff;" onerror="this.src='https://via.placeholder.com/64x64?text=Sin+img'" />
+          <div style="flex:1;">
+            <div style="font-weight:700; color:#222; font-size:1rem;">${capitalize(p.nombre)}</div>
+            <div style="color:#666; font-size:0.95rem;">${p.categoria} - ${p.genero}</div>
+            <div style="color:#888; font-size:0.9rem;">Color: ${p.color || '-'}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    productSearchInput.addEventListener('input', e => {
+      renderProductResults(e.target.value);
+    });
+
+    // Mostrar todos al inicio
+    renderProductResults('');
+  </script>
+</body>
+</html>

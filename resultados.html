@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados del Cuestionario - Shop.co</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <style>
+        .cuestionario-container {
+            max-width: 1200px;
+            margin: 1rem auto;
+            padding: 1rem;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(44,62,80,0.13);
+            position: relative;
+            width: 95%;
+        }
+        .cuestionario-container h1 {
+            font-size: clamp(1.8rem, 4vw, 2.6rem);
+            font-family: 'Montserrat', Arial, sans-serif;
+            color: #111;
+            font-weight: 900;
+            letter-spacing: -1px;
+            margin-bottom: 0.7rem;
+            text-shadow: 0 2px 12px #1112;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            flex-wrap: wrap;
+        }
+        .cuestionario-container h1::before {
+            content: '\1F4CA'; /* 📊 */
+            font-size: 2.2rem;
+            margin-right: 0.2em;
+        }
+        .resultados-container {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            width: 100%;
+            justify-content: center;
+        }
+        .grafico-card {
+            background: #fff;
+            padding: 1rem;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px #0001, 0 2px 8px #0001;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-width: 280px;
+            max-width: 100%;
+            margin: 0 auto 1rem auto;
+        }
+        .grafico-card canvas {
+            width: 100% !important;
+            height: auto !important;
+            min-height: 200px;
+            max-height: 400px;
+            aspect-ratio: 16/9;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .chart-stats-title {
+            color: #111;
+            font-size: clamp(0.9rem, 2vw, 1.05rem);
+            font-weight: 800;
+            margin-bottom: 0.3rem;
+            text-align: center;
+            letter-spacing: 0.01em;
+        }
+        .desc-ia {
+            margin-top: 0.7rem;
+            font-size: clamp(0.85rem, 2vw, 0.98rem);
+            color: #222;
+            background: #f6f6f6;
+            border-radius: 10px;
+            padding: 0.7rem 1rem;
+            box-shadow: 0 1px 4px #0001;
+            width: 100%;
+        }
+        .respuestas-container {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(44,62,80,0.13);
+            width: 95%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .respuestas-container h2 {
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            color: #111;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            flex-wrap: wrap;
+        }
+        .respuestas-container h2::before {
+            content: '📋';
+            font-size: 1.8rem;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin: 0 -1rem;
+            padding: 0 1rem;
+            -webkit-overflow-scrolling: touch;
+        }
+        #respuestas-table {
+            width: 100%;
+            min-width: 800px;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 1rem 0;
+            font-size: clamp(0.8rem, 1.5vw, 0.95rem);
+        }
+        #respuestas-table th,
+        #respuestas-table td {
+            padding: clamp(0.5rem, 1vw, 1rem);
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            white-space: nowrap;
+        }
+        #respuestas-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #111;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        #respuestas-table tbody tr {
+            transition: background-color 0.2s;
+        }
+        #respuestas-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        #respuestas-table td {
+            color: #444;
+        }
+        .rating-cell {
+            font-weight: 600;
+            text-align: center;
+        }
+        .rating-5 { color: #059669; }
+        .rating-4 { color: #0ea5e9; }
+        .rating-3 { color: #f59e0b; }
+        .rating-2 { color: #f97316; }
+        .rating-1 { color: #ef4444; }
+        @media (max-width: 768px) {
+            .cuestionario-container {
+                margin: 0.5rem auto;
+                padding: 0.8rem;
+            }
+            .resultados-container {
+                gap: 1rem;
+            }
+            .grafico-card {
+                padding: 0.8rem;
+            }
+            .respuestas-container,
+            .medias-dimensiones-container {
+                padding: 0.8rem;
+            }
+            .table-container {
+                margin: 0 -0.8rem;
+                padding: 0 0.8rem;
+            }
+        }
+        @media (max-width: 480px) {
+            .cuestionario-container {
+                margin: 0.3rem auto;
+                padding: 0.5rem;
+                width: 98%;
+            }
+            .resultados-container {
+                gap: 0.8rem;
+            }
+            .grafico-card {
+                padding: 0.5rem;
+            }
+            .respuestas-container,
+            .medias-dimensiones-container {
+                padding: 0.5rem;
+                width: 98%;
+            }
+            .table-container {
+                margin: 0 -0.5rem;
+                padding: 0 0.5rem;
+            }
+            .desc-ia {
+                padding: 0.5rem 0.8rem;
+            }
+        }
+        .medias-dimensiones-container {
+            margin-top: 2rem;
+            background: #fff;
+            border-radius: 22px;
+            box-shadow: 0 8px 32px #0001;
+            padding: 1.5rem 1rem;
+            width: 95%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .medias-title {
+            font-size: clamp(1.5rem, 3vw, 2.1rem);
+            font-family: 'Dekko', cursive;
+            font-weight: 900;
+            color: #111;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            letter-spacing: -1px;
+            flex-wrap: wrap;
+        }
+        .medias-icon {
+            font-size: 2.1rem;
+        }
+        .medias-table-container {
+            overflow-x: auto;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px #0001;
+            background: #fff;
+        }
+        .medias-table {
+            width: 100%;
+            min-width: 800px;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: clamp(0.85rem, 1.5vw, 1.05rem);
+        }
+        .medias-table th, 
+        .medias-table td {
+            padding: clamp(0.5rem, 1vw, 1.1rem) clamp(0.4rem, 1vw, 0.8rem);
+            text-align: left;
+            border-bottom: 1px solid #f1f1f1;
+            white-space: nowrap;
+        }
+        .medias-table th {
+            background: linear-gradient(90deg, #f3f3f3 0%, #e9e9e9 100%);
+            font-weight: 800;
+            color: #111;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            font-size: 1.08rem;
+            letter-spacing: 0.01em;
+        }
+        .medias-table tbody tr:nth-child(even) {
+            background: #fafbfc;
+        }
+        .medias-table tbody tr:hover {
+            background: #f0f4fa;
+            transition: background 0.2s;
+        }
+        .medias-table td {
+            color: #333;
+            font-family: 'Montserrat', Arial, sans-serif;
+        }
+        .medias-table .media-badge {
+            display: inline-block;
+            min-width: 2em;
+            padding: 0.3em 0.7em;
+            border-radius: 1.2em;
+            font-weight: 700;
+            font-size: clamp(0.9em, 1.5vw, 1.05em);
+            text-align: center;
+            background: #f3f3f3;
+            color: #222;
+            box-shadow: 0 1px 4px #0001;
+        }
+        /* Colores según valor */
+        .media-badge[data-val^="5"] { background: #d1fae5; color: #059669; }
+        .media-badge[data-val^="4"] { background: #dbeafe; color: #2563eb; }
+        .media-badge[data-val^="3"] { background: #fef9c3; color: #f59e0b; }
+        .media-badge[data-val^="2"] { background: #fee2e2; color: #ef4444; }
+        .media-badge[data-val^="1"] { background: #fee2e2; color: #b91c1c; }
+        @media (max-width: 900px) {
+            .medias-table {
+                font-size: 0.95rem;
+                min-width: 700px;
+            }
+            .medias-title {
+                font-size: 1.3rem;
+            }
+        }
+        @media (max-width: 600px) {
+            .medias-dimensiones-container {
+                padding: 1.2rem 0.2rem 1.2rem 0.2rem;
+            }
+            .medias-table th, .medias-table td {
+                padding: 0.7rem 0.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cuestionario-container">
+        <h1>Resultados del Cuestionario</h1>
+        <div class="resultados-container">
+            <div class="grafico-card">
+                <canvas id="calidadChart"></canvas>
+            </div>
+            <div class="grafico-card">
+                <canvas id="personalizacionChart"></canvas>
+            </div>
+            <div class="grafico-card">
+                <canvas id="diversidadChart"></canvas>
+            </div>
+            <div class="grafico-card">
+                <canvas id="iaChart"></canvas>
+            </div>
+            <div class="grafico-card">
+                <canvas id="indexacionChart"></canvas>
+            </div>
+            <div class="grafico-card">
+                <canvas id="usabilidadChart"></canvas>
+            </div>
+            <div class="grafico-card">
+                <canvas id="satisfaccionChart"></canvas>
+            </div>
+            <div class="grafico-card">
+                <canvas id="fidelizacionChart"></canvas>
+            </div>
+            <div class="grafico-card">
+                <canvas id="demograficosChart"></canvas>
+            </div>
+        </div>
+        <div class="respuestas-container">
+            <h2>Respuestas Individuales</h2>
+            <div class="table-container">
+                <table id="respuestas-table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Fecha</th>
+                            <th>Sexo</th>
+                            <th>Edad</th>
+                            <th>Educación</th>
+                            <th>Frecuencia Compra</th>
+                            <th>Calidad 1</th>
+                            <th>Calidad 2</th>
+                            <th>Personalización 1</th>
+                            <th>Personalización 2</th>
+                            <th>Diversidad 1</th>
+                            <th>Diversidad 2</th>
+                            <th>IA 1</th>
+                            <th>IA 2</th>
+                            <th>IA 3</th>
+                            <th>Indexación 1</th>
+                            <th>Indexación 2</th>
+                            <th>Indexación 3</th>
+                            <th>Usabilidad 1</th>
+                            <th>Usabilidad 2</th>
+                            <th>Satisfacción 1</th>
+                            <th>Satisfacción 2</th>
+                            <th>Fidelización 1</th>
+                            <th>Fidelización 2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Las respuestas se cargarán dinámicamente aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="respuestas-container medias-dimensiones-container">
+            <h2 class="medias-title"><span class="medias-icon">📋</span> Medias por Usuario y Dimensión</h2>
+            <div class="table-container medias-table-container">
+                <table id="medias-table" class="medias-table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Fecha</th>
+                            <th>Sexo</th>
+                            <th>Edad</th>
+                            <th>Educación</th>
+                            <th>Frecuencia Compra</th>
+                            <th>Calidad</th>
+                            <th>Personalización</th>
+                            <th>Diversidad</th>
+                            <th>IA</th>
+                            <th>Indexación</th>
+                            <th>Usabilidad</th>
+                            <th>Satisfacción</th>
+                            <th>Fidelización</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Las medias se cargarán dinámicamente aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script type="module">
+        import { db } from './js/firebase-config.js';
+        import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // --- MAPA DE PREGUNTAS LEÍBLES ---
+        const PREGUNTAS_LEIBLES = {
+            'calidad_1': 'Las recomendaciones suelen coincidir con mis gustos personales.',
+            'calidad_2': 'Las recomendaciones abarcan productos realmente relevantes para mí.',
+            'personal_1': 'Las sugerencias que recibo se ajustan a mis preferencias individuales.',
+            'personal_2': 'Las recomendaciones me son útiles para decidir qué prendas comprar o usar.',
+            'diversidad_1': 'Las recomendaciones me ofrecen una variedad amplia de opciones.',
+            'diversidad_2': 'Frecuentemente encuentro prendas novedosas gracias al sistema.',
+            'ia_1': 'Las recomendaciones generadas por el sistema son precisas gracias al uso de IA.',
+            'ia_2': 'El sistema aprende de mis elecciones anteriores y mejora con el tiempo.',
+            'ia_3': 'Percibo que las recomendaciones se adaptan a mis cambios de preferencia.',
+            'indexacion_1': 'El sistema responde de forma rápida cuando busco productos.',
+            'indexacion_2': 'Las recomendaciones están basadas en información actualizada.',
+            'indexacion_3': 'Considero relevante la información mostrada por el sistema.',
+            'usabilidad_1': 'La plataforma es fácil de entender y utilizar.',
+            'usabilidad_2': 'No tengo dificultades para completar tareas como buscar o seleccionar productos.',
+            'satisfaccion_1': 'Me siento satisfecho(a) con la experiencia general del sistema.',
+            'satisfaccion_2': 'Continuaré usando la plataforma debido a sus recomendaciones.',
+            'fidelizacion_1': 'Uso la plataforma al menos una vez por semana.',
+            'fidelizacion_2': 'Paso bastante tiempo navegando por las recomendaciones de la plataforma.',
+            'sexo': 'Sexo',
+            'edad': 'Edad',
+            'educacion': 'Nivel educativo',
+            'frecuencia_compra': 'Frecuencia de compra online de ropa'
+        };
+
+        // Objeto para almacenar las instancias de los gráficos
+        let charts = {
+            calidad: null,
+            personalizacion: null,
+            diversidad: null,
+            ia: null,
+            indexacion: null,
+            usabilidad: null,
+            satisfaccion: null,
+            fidelizacion: null,
+            demograficos: null
+        };
+
+        // Función para destruir un gráfico existente
+        function destroyChart(chartId) {
+            if (charts[chartId]) {
+                charts[chartId].destroy();
+                charts[chartId] = null;
+            }
+        }
+
+        // Función para calcular la distribución de respuestas en escala Likert
+        function calcularDistribucion(respuestas, campos) {
+            const distribucion = [0, 0, 0, 0, 0];
+            respuestas.forEach(respuesta => {
+                campos.forEach(campo => {
+                    const valor = parseInt(respuesta[campo]);
+                    if (valor >= 1 && valor <= 5) {
+                        distribucion[valor - 1]++;
+                    }
+                });
+            });
+            return distribucion;
+        }
+
+        // Función para calcular estadísticas descriptivas
+        function calcularEstadisticas(respuestas, campos) {
+            const valores = [];
+            respuestas.forEach(respuesta => {
+                campos.forEach(campo => {
+                    const valor = parseInt(respuesta[campo]);
+                    if (valor >= 1 && valor <= 5) {
+                        valores.push(valor);
+                    }
+                });
+            });
+            if (valores.length === 0) {
+                return { media: 0, desviacion: 0, moda: 0, total: 0 };
+            }
+            const media = valores.reduce((a, b) => a + b, 0) / valores.length;
+            const desviacion = Math.sqrt(valores.reduce((a, b) => a + Math.pow(b - media, 2), 0) / valores.length);
+            const moda = valores.sort((a,b) => valores.filter(v => v===a).length - valores.filter(v => v===b).length).pop();
+            return {
+                media: media.toFixed(2),
+                desviacion: desviacion.toFixed(2),
+                moda: moda,
+                total: valores.length
+            };
+        }
+
+        // Sobrescribir cada función de gráfico para mostrar mensaje si no hay datos
+        function mostrarSinDatos(ctx, mensaje = 'Sin datos') {
+            ctx.save();
+            ctx.font = '18px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.fillText(mensaje, ctx.canvas.width / 2, ctx.canvas.height / 2);
+            ctx.restore();
+        }
+
+        // Función para mostrar la descripción IA debajo del gráfico, soportando Markdown básico y evitando negrita en números
+        function mostrarDescripcionIA(chartId, texto) {
+            let descDiv = document.getElementById(chartId + '-desc');
+            if (!descDiv) {
+                const card = document.getElementById(chartId + 'Chart').parentElement;
+                descDiv = document.createElement('div');
+                descDiv.id = chartId + '-desc';
+                descDiv.className = 'desc-ia';
+                card.appendChild(descDiv);
+            }
+            // Reemplazo de Markdown a HTML para negritas, pero solo si no es un número
+            let html = texto.replace(/\*\*(.*?)\*\*/g, (match, p1) => {
+                if (/^[0-9.,\s]+$/.test(p1)) return p1; // Si solo es número, no negrita
+                return `<strong>${p1}</strong>`;
+            }).replace(/\n/g, '<br>');
+            descDiv.innerHTML = `<strong>Interpretación IA:</strong><br>${html}`;
+        }
+
+        // --- Helpers de colores y gradientes para los gráficos ---
+        const colorPorGrafico = {
+            calidad:    '#2563eb', // azul
+            personalizacion: '#fb7185', // rosa
+            diversidad: '#22c55e', // verde
+            ia:         '#a78bfa', // violeta
+            indexacion: '#fbbf24', // amarillo
+            usabilidad: '#fdba74', // naranja
+            satisfaccion: '#38bdf8', // celeste
+            fidelizacion: '#be185d' // rojo
+        };
+        function getBarGradient(ctx, gradColors) {
+            const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+            gradient.addColorStop(0, gradColors[0]);
+            gradient.addColorStop(1, gradColors[1]);
+            return gradient;
+        }
+
+        // Configuración Gemini IA
+        const GEMINI_API_KEY = 'AIzaSyA0PkP6I-6U8Rob-i7_kJmKex6d3fePkDg';
+        const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
+        async function generarDescripcionIA(nombre, datos, total, labels, stats) {
+            const prompt = `Eres un experto en estadística y visualización de datos. Analiza e interpreta en español los resultados de la siguiente dimensión de un cuestionario tipo Likert (1-5). Sé claro, profesional y un poco más detallado. Incluye: tendencia general, valor más frecuente, media, desviación estándar, posibles causas de los resultados y una recomendación breve para mejorar la experiencia del usuario. No repitas el nombre de la dimensión más de una vez.\n\nDimensión: ${nombre}\nDistribución de respuestas: ${labels.map((l,i)=>`${l}: ${datos[i]}`).join(', ')} (Total: ${total})\nMedia: ${stats.media}\nDesviación estándar: ${stats.desviacion}`;
+            try {
+                const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }]
+                    })
+                });
+                if (!response.ok) throw new Error('Error en la API Gemini');
+                const data = await response.json();
+                if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0]) {
+                    throw new Error('Respuesta inválida de Gemini');
+                }
+                return data.candidates[0].content.parts[0].text;
+            } catch (e) {
+                return 'No se pudo generar la interpretación automática.';
+            }
+        }
+
+        // Colores vivos para cada valor de la escala Likert
+        const likertColors = [
+            '#60a5fa', // 1 - azul
+            '#fbbf24', // 2 - amarillo
+            '#34d399', // 3 - verde
+            '#fb7185', // 4 - naranja/rojo
+            '#a78bfa'  // 5 - violeta
+        ];
+
+        // Helper para renderizar título y subtítulo en cada tarjeta de gráfico
+        function renderTituloGrafico(chartId, titulo, subtitulo) {
+            let canvas = document.getElementById(chartId + 'Chart');
+            let parent = canvas.parentElement;
+            // Elimina títulos previos
+            let oldTitle = parent.querySelector('.grafico-titulo');
+            if (oldTitle) oldTitle.remove();
+            let oldSub = parent.querySelector('.grafico-subtitulo');
+            if (oldSub) oldSub.remove();
+            let oldLine = parent.querySelector('.grafico-linea');
+            if (oldLine) oldLine.remove();
+            // Título principal
+            let div = document.createElement('div');
+            div.className = 'grafico-titulo';
+            div.style.cssText = 'font-size:1.18rem;font-weight:900;color:#222;margin-bottom:0.1rem;text-align:left;letter-spacing:-1px;';
+            div.innerText = titulo;
+            parent.insertBefore(div, canvas);
+            // Línea azul
+            let line = document.createElement('div');
+            line.className = 'grafico-linea';
+            line.style.cssText = 'height:3px;width:100%;background:#2563eb;border-radius:2px;margin-bottom:0.5rem;';
+            parent.insertBefore(line, canvas);
+            // Subtítulo
+            let sub = document.createElement('div');
+            sub.className = 'grafico-subtitulo';
+            sub.style.cssText = 'font-size:0.98rem;color:#666;margin-bottom:0.7rem;text-align:left;';
+            sub.innerText = subtitulo;
+            parent.insertBefore(sub, canvas);
+        }
+
+        function getChartOptions(stats, respuestas, label, opts = {}) {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        align: 'center',
+                        labels: {
+                            color: '#1e293b',
+                            font: { size: 18, weight: 'bold', family: 'Montserrat, Arial, sans-serif' },
+                            boxWidth: 22,
+                            boxHeight: 22,
+                            padding: 22
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#111',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: '#1e293b',
+                        borderWidth: 1,
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.raw;
+                                const percentage = ((value / stats.total) * 100).toFixed(1);
+                                return `${value} respuestas (${percentage}%)`;
+                            }
+                        }
+                    },
+                    datalabels: {
+                        display: false // No mostrar números encima de las barras
+                    }
+                },
+                animation: {
+                    duration: 900,
+                    easing: 'easeOutCubic'
+                },
+                layout: {
+                    padding: { top: 18, right: 10, bottom: 5, left: 10 }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        suggestedMax: Math.max(...respuestas.map(r => 5), 5),
+                        title: {
+                            display: true,
+                            text: 'Número de respuestas',
+                            color: '#111',
+                            font: { size: 18, weight: 'bold', family: 'Montserrat, Arial, sans-serif' }
+                        },
+                        grid: {
+                            color: '#e3eafc',
+                            borderDash: [4, 4]
+                        },
+                        ticks: { color: '#1e293b', font: { size: 16, family: 'Montserrat, Arial, sans-serif' } }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Escala Likert',
+                            color: '#111',
+                            font: { size: 18, weight: 'bold', family: 'Montserrat, Arial, sans-serif' }
+                        },
+                        grid: {
+                            color: '#f3f6fb',
+                            borderDash: [2, 2]
+                        },
+                        ticks: {
+                            color: '#1e293b',
+                            font: { size: 16, family: 'Montserrat, Arial, sans-serif' },
+                            maxRotation: opts.xLabelAngle || 0,
+                            minRotation: opts.xLabelAngle || 0
+                        }
+                    }
+                },
+                elements: {
+                    bar: {
+                        borderRadius: 4,
+                        borderSkipped: false,
+                        borderWidth: 1.5,
+                        barPercentage: 0.95,
+                        categoryPercentage: 0.95
+                    }
+                }
+            };
+        }
+
+        // Inicializar gráficos al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            actualizarGraficos();
+        });
+
+        // Función para actualizar la tabla de respuestas
+        function actualizarTablaRespuestas(respuestas) {
+            const tbody = document.querySelector('#respuestas-table tbody');
+            tbody.innerHTML = '';
+
+            respuestas.forEach(respuesta => {
+                const row = document.createElement('tr');
+                // Formatear fecha de manera robusta
+                let fecha;
+                if (respuesta.timestamp && typeof respuesta.timestamp.toDate === 'function') {
+                    fecha = respuesta.timestamp.toDate();
+                } else if (respuesta.timestamp) {
+                    fecha = new Date(respuesta.timestamp);
+                } else {
+                    fecha = null;
+                }
+                const fechaFormateada = fecha
+                    ? fecha.toLocaleDateString('es-ES', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })
+                    : '-';
+                row.innerHTML = `
+                    <td>${respuesta.userEmail || 'Anónimo'}</td>
+                    <td>${fechaFormateada}</td>
+                    <td>${respuesta.sexo || '-'}</td>
+                    <td>${respuesta.edad || '-'}</td>
+                    <td>${respuesta.educacion || '-'}</td>
+                    <td>${respuesta.frecuencia_compra || '-'}</td>
+                    <td class="rating-cell rating-${respuesta.calidad_1}">${respuesta.calidad_1 || '-'}</td>
+                    <td class="rating-cell rating-${respuesta.calidad_2}">${respuesta.calidad_2 || '-'}</td>
+                    <td class="rating-cell rating-${respuesta.personal_1}">${respuesta.personal_1 || '-'}</td>
+                    <td class="rating-cell rating-${respuesta.personal_2}">${respuesta.personal_2 || '-'}</td>
+                    <td class="rating-cell rating-${respuesta.diversidad_1}">${respuesta.diversidad_1 || '-'}</td>
+                    <td class="rating-cell rating-${respuesta.diversidad_2}">${respuesta.diversidad_2 || '-'}</td>
+                    <td class="rating-cell rating-${respuesta.ia_1}">${respuesta.ia_1 || '-'}</td>
+                    <td class="rating-cell rating-${respuesta.ia_2}">${respuesta.ia_2 || '-'}</td>
+                    <td class="rating-cell rating-${respuesta.ia_3}">${respuesta.ia_3 || '-'}</td>
+                    <td class="rating-cell rating-${respuesta.indexacion_1}">${respuesta.indexacion_1 || '-'}</td>
+                    <td class="rating-cell rating-${respuesta.indexacion_2}">${respuesta.indexacion_2 || '-'}</td>
+                    <td class="rating-cell rating-${respuesta.indexacion_3}">${respuesta.indexacion_3 || '-'}</td>
+                    <td class="rating-cell rating-${respuesta.usabilidad_1}">${respuesta.usabilidad_1 || '-'}</td>
+                    <td class="rating-cell rating-${respuesta.usabilidad_2}">${respuesta.usabilidad_2 || '-'}</td>
+                    <td class="rating-cell rating-${respuesta.satisfaccion_1}">${respuesta.satisfaccion_1 || '-'}</td>
+                    <td class="rating-cell rating-${respuesta.satisfaccion_2}">${respuesta.satisfaccion_2 || '-'}</td>
+                    <td class="rating-cell rating-${respuesta.fidelizacion_1}">${respuesta.fidelizacion_1 || '-'}</td>
+                    <td class="rating-cell rating-${respuesta.fidelizacion_2}">${respuesta.fidelizacion_2 || '-'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function actualizarTablaMedias(respuestas) {
+            const tbody = document.querySelector('#medias-table tbody');
+            tbody.innerHTML = '';
+            respuestas.forEach(respuesta => {
+                const row = document.createElement('tr');
+                // Formatear fecha de manera robusta
+                let fecha;
+                if (respuesta.timestamp && typeof respuesta.timestamp.toDate === 'function') {
+                    fecha = respuesta.timestamp.toDate();
+                } else if (respuesta.timestamp) {
+                    fecha = new Date(respuesta.timestamp);
+                } else {
+                    fecha = null;
+                }
+                const fechaFormateada = fecha
+                    ? fecha.toLocaleDateString('es-ES', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })
+                    : '-';
+                // Calcular medias
+                const calidad = calcularPromedio([respuesta.calidad_1, respuesta.calidad_2]);
+                const personalizacion = calcularPromedio([respuesta.personal_1, respuesta.personal_2]);
+                const diversidad = calcularPromedio([respuesta.diversidad_1, respuesta.diversidad_2]);
+                const ia = calcularPromedio([respuesta.ia_1, respuesta.ia_2, respuesta.ia_3]);
+                const indexacion = calcularPromedio([respuesta.indexacion_1, respuesta.indexacion_2, respuesta.indexacion_3]);
+                const usabilidad = calcularPromedio([respuesta.usabilidad_1, respuesta.usabilidad_2]);
+                const satisfaccion = calcularPromedio([respuesta.satisfaccion_1, respuesta.satisfaccion_2]);
+                const fidelizacion = calcularPromedio([respuesta.fidelizacion_1, respuesta.fidelizacion_2]);
+                row.innerHTML = `
+                    <td>${respuesta.userEmail || 'Anónimo'}</td>
+                    <td>${fechaFormateada}</td>
+                    <td>${respuesta.sexo || '-'}</td>
+                    <td>${respuesta.edad || '-'}</td>
+                    <td>${respuesta.educacion || '-'}</td>
+                    <td>${respuesta.frecuencia_compra || '-'}</td>
+                    <td><span class="media-badge" data-val="${calidad}">${calidad}</span></td>
+                    <td><span class="media-badge" data-val="${personalizacion}">${personalizacion}</span></td>
+                    <td><span class="media-badge" data-val="${diversidad}">${diversidad}</span></td>
+                    <td><span class="media-badge" data-val="${ia}">${ia}</span></td>
+                    <td><span class="media-badge" data-val="${indexacion}">${indexacion}</span></td>
+                    <td><span class="media-badge" data-val="${usabilidad}">${usabilidad}</span></td>
+                    <td><span class="media-badge" data-val="${satisfaccion}">${satisfaccion}</span></td>
+                    <td><span class="media-badge" data-val="${fidelizacion}">${fidelizacion}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Modificar la función actualizarGraficos para incluir la actualización de la tabla
+        async function actualizarGraficos() {
+            try {
+                const respuestasRef = collection(db, 'respuestas_cuestionario');
+                const q = query(respuestasRef, orderBy('timestamp', 'desc'));
+                const snapshot = await getDocs(q);
+                if (snapshot.empty) {
+                    Object.keys(charts).forEach(chartId => {
+                        const canvas = document.getElementById(chartId + 'Chart');
+                        if (canvas) mostrarSinDatos(canvas.getContext('2d'));
+                    });
+                    document.querySelector('.respuestas-container').style.display = 'none';
+                    return;
+                }
+                const respuestas = snapshot.docs.map(doc => ({...doc.data().respuestas, userEmail: doc.data().userEmail, userId: doc.data().userId, timestamp: doc.data().timestamp }));
+                Object.keys(charts).forEach(destroyChart);
+                await actualizarGraficoCalidad(respuestas);
+                await actualizarGraficoPersonalizacion(respuestas);
+                await actualizarGraficoDiversidad(respuestas);
+                await actualizarGraficoIA(respuestas);
+                await actualizarGraficoIndexacion(respuestas);
+                await actualizarGraficoUsabilidad(respuestas);
+                await actualizarGraficoSatisfaccion(respuestas);
+                await actualizarGraficoFidelizacion(respuestas);
+                await actualizarGraficoDemograficos(respuestas);
+                actualizarTablaRespuestas(respuestas);
+                actualizarTablaMedias(respuestas);
+            } catch (error) {
+                console.error('Error al actualizar gráficos:', error);
+            }
+        }
+
+        // Función auxiliar para calcular promedio
+        function calcularPromedio(valores) {
+            const numeros = valores.filter(v => v !== undefined && v !== null).map(Number);
+            if (numeros.length === 0) return '-';
+            const promedio = numeros.reduce((a, b) => a + b, 0) / numeros.length;
+            return promedio.toFixed(1);
+        }
+
+        // Registrar el plugin datalabels de Chart.js
+        Chart.register(window.ChartDataLabels);
+
+        // Función para mostrar el título de estadísticas arriba de cada gráfico
+        function setEstadisticasTitulo(chartId, stats) {
+            let canvas = document.getElementById(chartId + 'Chart');
+            let parent = canvas.parentElement;
+            let oldTitle = parent.querySelector('.chart-stats-title');
+            if (oldTitle) oldTitle.remove();
+            let div = document.createElement('div');
+            div.className = 'chart-stats-title';
+            div.style.cssText = 'color:#111;font-size:1.05rem;font-weight:800;margin-bottom:0.3rem;text-align:center;';
+            div.innerText = `Estadísticas: Media = ${stats.media}, Desviación = ${stats.desviacion}, Moda = ${stats.moda}`;
+            parent.insertBefore(div, canvas);
+        }
+
+        // Función para actualizar gráfico de Calidad
+        async function actualizarGraficoCalidad(respuestas) {
+            destroyChart('calidad');
+            const ctx = document.getElementById('calidadChart').getContext('2d');
+            renderTituloGrafico('calidad', 'Calidad de recomendación', '¿Las recomendaciones coinciden con los gustos y necesidades del usuario?');
+            const stats = calcularEstadisticas(respuestas, ['calidad_1', 'calidad_2']);
+            const dataArr = calcularDistribucion(respuestas, ['calidad_1', 'calidad_2']);
+            const data = {
+                labels: ['1', '2', '3', '4', '5'],
+                datasets: [{
+                    label: 'Calidad de recomendación',
+                    data: dataArr,
+                    backgroundColor: colorPorGrafico.calidad,
+                    borderColor: colorPorGrafico.calidad,
+                    borderWidth: 1.5,
+                    borderRadius: 4,
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.8,
+                }]
+            };
+            setEstadisticasTitulo('calidad', stats);
+            charts.calidad = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: getChartOptions(stats, respuestas, 'Calidad de recomendación', {
+                    xLabelAngle: 0
+                })
+            });
+            mostrarDescripcionIA('calidad', 'Generando interpretación automática...');
+            const desc = await generarDescripcionIA('Calidad de recomendación', dataArr, stats.total, data.labels, stats);
+            mostrarDescripcionIA('calidad', desc);
+        }
+        // Función para actualizar gráfico de Personalización
+        async function actualizarGraficoPersonalizacion(respuestas) {
+            destroyChart('personalizacion');
+            const ctx = document.getElementById('personalizacionChart').getContext('2d');
+            renderTituloGrafico('personalizacion', 'Personalización percibida', '¿Las recomendaciones se ajustan a tus preferencias individuales?');
+            const stats = calcularEstadisticas(respuestas, ['personal_1', 'personal_2']);
+            const dataArr = calcularDistribucion(respuestas, ['personal_1', 'personal_2']);
+            const data = {
+                labels: ['1', '2', '3', '4', '5'],
+                datasets: [{
+                    label: 'Personalización percibida',
+                    data: dataArr,
+                    backgroundColor: colorPorGrafico.personalizacion,
+                    borderColor: colorPorGrafico.personalizacion,
+                    borderWidth: 1.5,
+                    borderRadius: 4,
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.8,
+                }]
+            };
+            setEstadisticasTitulo('personalizacion', stats);
+            charts.personalizacion = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: getChartOptions(stats, respuestas, 'Personalización percibida', {
+                    xLabelAngle: 0
+                })
+            });
+            mostrarDescripcionIA('personalizacion', 'Generando interpretación automática...');
+            const desc = await generarDescripcionIA('Personalización percibida', dataArr, stats.total, data.labels, stats);
+            mostrarDescripcionIA('personalizacion', desc);
+        }
+        // Función para actualizar gráfico de Diversidad
+        async function actualizarGraficoDiversidad(respuestas) {
+            destroyChart('diversidad');
+            const ctx = document.getElementById('diversidadChart').getContext('2d');
+            renderTituloGrafico('diversidad', 'Diversidad de recomendaciones', '¿Las recomendaciones te ofrecen una variedad amplia de opciones?');
+            const stats = calcularEstadisticas(respuestas, ['diversidad_1', 'diversidad_2']);
+            const dataArr = calcularDistribucion(respuestas, ['diversidad_1', 'diversidad_2']);
+            const data = {
+                labels: ['1', '2', '3', '4', '5'],
+                datasets: [{
+                    label: 'Diversidad de recomendaciones',
+                    data: dataArr,
+                    backgroundColor: colorPorGrafico.diversidad,
+                    borderColor: colorPorGrafico.diversidad,
+                    borderWidth: 1.5,
+                    borderRadius: 4,
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.8,
+                }]
+            };
+            setEstadisticasTitulo('diversidad', stats);
+            charts.diversidad = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: getChartOptions(stats, respuestas, 'Diversidad de recomendaciones', {
+                    xLabelAngle: 0
+                })
+            });
+            mostrarDescripcionIA('diversidad', 'Generando interpretación automática...');
+            const desc = await generarDescripcionIA('Diversidad de recomendaciones', dataArr, stats.total, data.labels, stats);
+            mostrarDescripcionIA('diversidad', desc);
+        }
+        // Función para actualizar gráfico de IA
+        async function actualizarGraficoIA(respuestas) {
+            destroyChart('ia');
+            const ctx = document.getElementById('iaChart').getContext('2d');
+            renderTituloGrafico('ia', 'Inteligencia Artificial', '¿Las recomendaciones generadas por el sistema son precisas y útiles?');
+            const stats = calcularEstadisticas(respuestas, ['ia_1', 'ia_2', 'ia_3']);
+            const dataArr = calcularDistribucion(respuestas, ['ia_1', 'ia_2', 'ia_3']);
+            const data = {
+                labels: ['1', '2', '3', '4', '5'],
+                datasets: [{
+                    label: 'Inteligencia Artificial',
+                    data: dataArr,
+                    backgroundColor: colorPorGrafico.ia,
+                    borderColor: colorPorGrafico.ia,
+                    borderWidth: 1.5,
+                    borderRadius: 4,
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.8,
+                }]
+            };
+            setEstadisticasTitulo('ia', stats);
+            charts.ia = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: getChartOptions(stats, respuestas, 'Inteligencia Artificial', {
+                    xLabelAngle: 0
+                })
+            });
+            mostrarDescripcionIA('ia', 'Generando interpretación automática...');
+            const desc = await generarDescripcionIA('Inteligencia Artificial', dataArr, stats.total, data.labels, stats);
+            mostrarDescripcionIA('ia', desc);
+        }
+        // Función para actualizar gráfico de Indexación
+        async function actualizarGraficoIndexacion(respuestas) {
+            destroyChart('indexacion');
+            const ctx = document.getElementById('indexacionChart').getContext('2d');
+            renderTituloGrafico('indexacion', 'Indexación de datos', '¿El sistema responde rápidamente cuando buscas productos?');
+            const stats = calcularEstadisticas(respuestas, ['indexacion_1', 'indexacion_2', 'indexacion_3']);
+            const dataArr = calcularDistribucion(respuestas, ['indexacion_1', 'indexacion_2', 'indexacion_3']);
+            const data = {
+                labels: ['1', '2', '3', '4', '5'],
+                datasets: [{
+                    label: 'Indexación de datos',
+                    data: dataArr,
+                    backgroundColor: colorPorGrafico.indexacion,
+                    borderColor: colorPorGrafico.indexacion,
+                    borderWidth: 1.5,
+                    borderRadius: 4,
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.8,
+                }]
+            };
+            setEstadisticasTitulo('indexacion', stats);
+            charts.indexacion = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: getChartOptions(stats, respuestas, 'Indexación de datos', {
+                    xLabelAngle: 0
+                })
+            });
+            mostrarDescripcionIA('indexacion', 'Generando interpretación automática...');
+            const desc = await generarDescripcionIA('Indexación de datos', dataArr, stats.total, data.labels, stats);
+            mostrarDescripcionIA('indexacion', desc);
+        }
+        // Función para actualizar gráfico de Usabilidad
+        async function actualizarGraficoUsabilidad(respuestas) {
+            destroyChart('usabilidad');
+            const ctx = document.getElementById('usabilidadChart').getContext('2d');
+            renderTituloGrafico('usabilidad', 'Usabilidad', '¿La plataforma es fácil de entender y utilizar?');
+            const stats = calcularEstadisticas(respuestas, ['usabilidad_1', 'usabilidad_2']);
+            const dataArr = calcularDistribucion(respuestas, ['usabilidad_1', 'usabilidad_2']);
+            const data = {
+                labels: ['1', '2', '3', '4', '5'],
+                datasets: [{
+                    label: 'Usabilidad',
+                    data: dataArr,
+                    backgroundColor: colorPorGrafico.usabilidad,
+                    borderColor: colorPorGrafico.usabilidad,
+                    borderWidth: 1.5,
+                    borderRadius: 4,
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.8,
+                }]
+            };
+            setEstadisticasTitulo('usabilidad', stats);
+            charts.usabilidad = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: getChartOptions(stats, respuestas, 'Usabilidad', {
+                    xLabelAngle: 0
+                })
+            });
+            mostrarDescripcionIA('usabilidad', 'Generando interpretación automática...');
+            const desc = await generarDescripcionIA('Usabilidad', dataArr, stats.total, data.labels, stats);
+            mostrarDescripcionIA('usabilidad', desc);
+        }
+        // Función para actualizar gráfico de Satisfacción
+        async function actualizarGraficoSatisfaccion(respuestas) {
+            destroyChart('satisfaccion');
+            const ctx = document.getElementById('satisfaccionChart').getContext('2d');
+            renderTituloGrafico('satisfaccion', 'Satisfacción', '¿Te sientes satisfecho(a) con la experiencia general del sistema?');
+            const stats = calcularEstadisticas(respuestas, ['satisfaccion_1', 'satisfaccion_2']);
+            const dataArr = calcularDistribucion(respuestas, ['satisfaccion_1', 'satisfaccion_2']);
+            const data = {
+                labels: ['1', '2', '3', '4', '5'],
+                datasets: [{
+                    label: 'Satisfacción',
+                    data: dataArr,
+                    backgroundColor: colorPorGrafico.satisfaccion,
+                    borderColor: colorPorGrafico.satisfaccion,
+                    borderWidth: 1.5,
+                    borderRadius: 4,
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.8,
+                }]
+            };
+            setEstadisticasTitulo('satisfaccion', stats);
+            charts.satisfaccion = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: getChartOptions(stats, respuestas, 'Satisfacción', {
+                    xLabelAngle: 0
+                })
+            });
+            mostrarDescripcionIA('satisfaccion', 'Generando interpretación automática...');
+            const desc = await generarDescripcionIA('Satisfacción', dataArr, stats.total, data.labels, stats);
+            mostrarDescripcionIA('satisfaccion', desc);
+        }
+        // Función para actualizar gráfico de Fidelización
+        async function actualizarGraficoFidelizacion(respuestas) {
+            destroyChart('fidelizacion');
+            const ctx = document.getElementById('fidelizacionChart').getContext('2d');
+            renderTituloGrafico('fidelizacion', 'Fidelización', '¿Te sientes satisfecho(a) con la plataforma y sus recomendaciones?');
+            const stats = calcularEstadisticas(respuestas, ['fidelizacion_1', 'fidelizacion_2']);
+            const dataArr = calcularDistribucion(respuestas, ['fidelizacion_1', 'fidelizacion_2']);
+            const data = {
+                labels: ['1', '2', '3', '4', '5'],
+                datasets: [{
+                    label: 'Fidelización',
+                    data: dataArr,
+                    backgroundColor: colorPorGrafico.fidelizacion,
+                    borderColor: colorPorGrafico.fidelizacion,
+                    borderWidth: 1.5,
+                    borderRadius: 4,
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.8,
+                }]
+            };
+            setEstadisticasTitulo('fidelizacion', stats);
+            charts.fidelizacion = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: getChartOptions(stats, respuestas, 'Fidelización', {
+                    xLabelAngle: 0
+                })
+            });
+            mostrarDescripcionIA('fidelizacion', 'Generando interpretación automática...');
+            const desc = await generarDescripcionIA('Fidelización', dataArr, stats.total, data.labels, stats);
+            mostrarDescripcionIA('fidelizacion', desc);
+        }
+        // Función para actualizar gráfico Demográficos (pie chart)
+        function actualizarGraficoDemograficos(respuestas) {
+            destroyChart('demograficos');
+            const ctx = document.getElementById('demograficosChart').getContext('2d');
+            // Procesar datos demográficos
+            const datosDemograficos = {
+                sexo: {},
+                edad: {},
+                educacion: {},
+                frecuencia_compra: {}
+            };
+            respuestas.forEach(r => {
+                ['sexo', 'edad', 'educacion', 'frecuencia_compra'].forEach(campo => {
+                    if (r[campo]) {
+                        datosDemograficos[campo][r[campo]] = (datosDemograficos[campo][r[campo]] || 0) + 1;
+                    }
+                });
+            });
+            // Paleta de colores vivos diferenciados
+            const coloresVivos = [
+                '#60a5fa', '#f472b6', '#34d399', '#fbbf24', '#a78bfa',
+                '#f87171', '#38bdf8', '#facc15', '#fb7185', '#4ade80'
+            ];
+            // Usar sexo como ejemplo principal (puedes cambiar a otro campo si prefieres)
+            const labels = Object.keys(datosDemograficos.sexo);
+            const values = Object.values(datosDemograficos.sexo);
+            const backgroundColors = labels.map((_, i) => coloresVivos[i % coloresVivos.length]);
+            const data = {
+                labels: labels,
+                datasets: [{
+                    label: 'Distribución demográfica',
+                    data: values,
+                    backgroundColor: backgroundColors,
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            };
+            setEstadisticasTitulo('demograficos', { media: 0, desviacion: 0, moda: 0, total: 0 });
+            charts.demograficos = new Chart(ctx, {
+                type: 'pie',
+                data: data,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#1e293b',
+                                font: { size: 15, weight: 'bold' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#111',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: '#1e293b',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const percentage = ((value / values.reduce((a,b)=>a+b,0)) * 100).toFixed(1);
+                                    return `${context.label}: ${value} respuestas (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1200,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+    </script>
+    <script type="module" src="js/firebase-config.js"></script>
+</body>
+</html> 

@@ -5,8 +5,300 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis Favoritos - Shop.co</title>
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .productos-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: calc(100vh - 200px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .productos-layout {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .productos-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .productos-header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .productos-count {
+            font-size: 1.1rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .select-ordenar {
+            padding: 0.8rem 2.5rem 0.8rem 1.2rem;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            background: white;
+            font-size: 1rem;
+            color: #333;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.8rem center;
+            background-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .select-ordenar:hover {
+            border-color: #FF4B4B;
+            box-shadow: 0 2px 8px rgba(255, 75, 75, 0.1);
+        }
+
+        .productos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 1rem 0;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 1400px;
+        }
+
+        .producto-card {
+            background: white;
+            border-radius: 18px !important;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.10) !important;
+            border: 1.5px solid #f3f3f3;
+            transition: box-shadow 0.3s, transform 0.3s;
+            overflow: visible;
+        }
+
+        .producto-card:hover {
+            box-shadow: 0 12px 32px rgba(0,0,0,0.13) !important;
+            transform: translateY(-8px) scale(1.025);
+        }
+
+        .producto-imagen {
+            border-radius: 18px 18px 0 0;
+            overflow: hidden;
+            background: #f7f7f7;
+            position: relative;
+        }
+
+        .producto-imagen img {
+            border-radius: 18px 18px 0 0;
+            transition: transform 0.5s cubic-bezier(.4,0,.2,1);
+        }
+
+        .producto-card:hover .producto-imagen img {
+            transform: scale(1.07);
+        }
+
+        .producto-info {
+            padding: 1.3rem 1.2rem 1.2rem 1.2rem !important;
+            background: #fff;
+            border-radius: 0 0 18px 18px;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .producto-info h3 {
+            font-size: 1.08rem;
+            font-weight: 700;
+            color: #232323;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.01em;
+            min-height: 2.2em;
+        }
+
+        .precios-container {
+            gap: 0.7rem;
+            margin-top: 0.2rem;
+        }
+
+        .precio-actual {
+            color: #111;
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .precio-antes {
+            color: #bbb;
+            font-size: 1rem;
+            text-decoration: line-through;
+        }
+
+        .descuento-badge {
+            top: 1rem !important;
+            right: 1rem !important;
+            left: auto !important;
+            background: #ff4b4b !important;
+            color: #fff !important;
+            font-size: 0.85rem !important;
+            padding: 0.35rem 0.9rem !important;
+            border-radius: 999px !important;
+            font-weight: 700 !important;
+            box-shadow: 0 2px 8px #ff4b4b22;
+            z-index: 3;
+        }
+
+        .producto-overlay {
+            top: 0.7rem;
+            right: 0.7rem;
+            left: auto;
+            bottom: auto;
+            background: none !important;
+            opacity: 1 !important;
+            pointer-events: none;
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-start;
+            position: absolute;
+            z-index: 4;
+        }
+
+        .btn-agregar {
+            background: #fff !important;
+            color: #ff4b4b !important;
+            border-radius: 50% !important;
+            width: 42px !important;
+            height: 42px !important;
+            min-width: 42px !important;
+            min-height: 42px !important;
+            box-shadow: 0 2px 8px #0001;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem !important;
+            padding: 0 !important;
+            border: none !important;
+            opacity: 1 !important;
+            transform: none !important;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            pointer-events: auto;
+        }
+
+        .btn-agregar:hover, .btn-agregar.activo {
+            background: #ff4b4b !important;
+            color: #fff !important;
+            box-shadow: 0 4px 16px #ff4b4b33;
+        }
+
+        .btn-agregar span:not(.icono-corazon) {
+            display: none !important;
+        }
+
+        .icono-corazon {
+            font-size: 1.5rem !important;
+            transition: transform 0.2s;
+        }
+
+        .btn-agregar:hover .icono-corazon {
+            transform: scale(1.18);
+        }
+
+        @media (max-width: 600px) {
+            .producto-info {
+                padding: 1rem !important;
+            }
+            .producto-card {
+                border-radius: 14px !important;
+            }
+            .producto-imagen, .producto-imagen img {
+                border-radius: 14px 14px 0 0 !important;
+            }
+        }
+
+        #no-favoritos {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        #no-favoritos h3 {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        #no-favoritos p {
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .btn-explorar {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: #FF4B4B;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-explorar:hover {
+            background: #FF6B6B;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 75, 75, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .producto-card {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @media (min-width: 1200px) {
+            .productos-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (min-width: 768px) and (max-width: 1199px) {
+            .productos-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 480px) and (max-width: 767px) {
+            .productos-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 479px) {
+            .productos-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
-<body>
+<body style="min-height: 100vh; display: flex; flex-direction: column;">
     <!-- Barra de promoción -->
     <div class="promo-bar">
         <p>Regístrate y obtén 20% de descuento en tu primer pedido. <a href="#" class="sign-up-link">Regístrate Ahora</a></p>
@@ -16,7 +308,7 @@
     <!-- Contenedor para el navbar reutilizable -->
     <div class="navbar-container"></div>
 
-    <div class="productos-container">
+    <div class="productos-container" style="flex: 1 0 auto;">
         <h2 id="titulo-favoritos">Mis Favoritos</h2>
         
         <div class="productos-layout">
@@ -54,23 +346,50 @@
     </div>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer class="footer" style="margin-top: auto;">
         <div class="footer-top">
-            <div class="footer-logo">SHOP.CO</div>
+            <div class="footer-logo">
+                <svg width="160" height="40" viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <text x="0" y="30" font-family="'Dekko', cursive" font-size="32" fill="#111" font-weight="bold" letter-spacing="2">OutfitAI</text>
+                </svg>
+            </div>
             <p class="footer-description">
-                Tu destino de moda favorito con las últimas tendencias y los mejores precios.
+                Plataforma innovadora que combina inteligencia artificial con moda para ofrecer recomendaciones personalizadas de outfits. Utilizando Gemini IA y análisis de datos en tiempo real, transformamos la experiencia de compra de ropa en una aventura de estilo inteligente.
             </p>
             <div class="social-links">
-                <a href="#" class="social-link">Twitter</a>
-                <a href="#" class="social-link">Facebook</a>
-                <a href="#" class="social-link">Instagram</a>
+                <a href="#" class="social-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
+                    </svg>
+                </a>
+                <a href="#" class="social-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                    </svg>
+                </a>
+                <a href="#" class="social-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <rect x="2" y="2" width="20" height="20" rx="5" />
+                        <path d="M12 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6z" fill="white" />
+                        <circle cx="17" cy="7" r="1" fill="white" />
+                    </svg>
+                </a>
+                <a href="https://github.com/Flores41/TESIS-WEB" class="social-link" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
+                    </svg>
+                </a>
+            </div>
+            <div class="footer-copyright">
+                <p class="copyright-text">© 2024 <span>OutfitAI</span>. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>
 
     <script type="module">
         import { db, auth } from './js/firebase-config.js';
-        import { collection, getDocs, doc, getDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { collection, getDocs, doc, getDoc, query, where, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { requireAuth, trackUserAction, trackPageView } from './js/auth-guard.js';
 
         let favoritosProductos = [];
@@ -165,14 +484,6 @@
                 
                 // Calcular descuento si existe precio anterior
                 let descuentoHtml = '';
-                if (producto.precioAntes) {
-                    const precioActual = parseFloat(producto.precio.replace(/[^0-9.]/g, ''));
-                    const precioAnterior = parseFloat(producto.precioAntes.replace(/[^0-9.]/g, ''));
-                    const descuento = Math.round(((precioAnterior - precioActual) / precioAnterior) * 100);
-                    if (descuento > 0) {
-                        descuentoHtml = `<div class="descuento-badge">-${descuento}%</div>`;
-                    }
-                }
 
                 // Hacer que toda la tarjeta sea clickeable
                 productoElement.style.cursor = 'pointer';
@@ -186,16 +497,15 @@
                     <div class="producto-imagen">
                         <img src="${producto.imagen}" alt="${producto.nombre}">
                         <div class="producto-overlay">
-                            <button class="btn-agregar activo" onclick="event.stopPropagation(); toggleFavorito('${producto.id}', this)">
+                            <button class="btn-agregar activo" title="Quitar de favoritos" onclick="event.stopPropagation(); toggleFavorito('${producto.id}', this)">
                                 <span class="icono-corazon">♥</span>
-                                <span>Quitar de favoritos</span>
                             </button>
                         </div>
                     </div>
                     <div class="producto-info">
                         <h3>${producto.nombre}</h3>
                         <div class="precios-container">
-                            <p class="precio-actual">${producto.precio}</p>
+                            <p class="precio-actual">${producto.precio && producto.precio !== "undefined" ? producto.precio : "No disponible"}</p>
                             ${producto.precioAntes ? `<p class="precio-antes">${producto.precioAntes}</p>` : ''}
                         </div>
                     </div>
