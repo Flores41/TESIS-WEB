@@ -893,6 +893,9 @@ body {
     grid-template-columns: repeat(4, 1fr);
     gap: 2.5rem;
     margin-top: 2rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 @media (max-width: 1200px) {
@@ -1511,6 +1514,9 @@ body {
     grid-template-columns: repeat(4, 1fr);
     gap: 2.5rem;
     margin-top: 2rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 @media (max-width: 1200px) {
