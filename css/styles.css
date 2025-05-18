@@ -1123,11 +1123,11 @@ body {
 
 /* Sección Browse by Dress Style */
 .browse-styles {
-    padding: 2.5rem 1rem 2.5rem 1rem;
+    max-width: 98vw;
+    width: 98vw;
+    padding: 2.5rem 1vw 2.5rem 1vw;
     background: #f6f6f6;
     border-radius: 24px;
-    max-width: 1700px;
-    margin: 2.5rem auto 2.5rem auto;
     box-shadow: 0 4px 32px #0001;
     display: flex;
     flex-direction: column;
@@ -1152,9 +1152,10 @@ body {
 .styles-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
     gap: 2.2rem 2.2rem;
     width: 100%;
-    max-width: 1500px;
+    max-width: 1600px;
     margin: 0 auto;
 }
 
@@ -1163,7 +1164,9 @@ body {
     background: #fff;
     border-radius: 22px;
     overflow: hidden;
-    min-height: 220px;
+    min-height: 320px;
+    height: 320px;
+    max-height: 320px;
     box-shadow: 0 2px 16px #0001;
     display: flex;
     align-items: flex-end;
@@ -3007,6 +3010,61 @@ body {
 @keyframes notifIconBounce {
   0% { transform: translateY(0); }
   100% { transform: translateY(-12px) scale(1.08); }
+}
+  
+.hero-benefits {
+    display: grid;
+    grid-template-columns: minmax(180px,1fr) 40px minmax(220px,1fr) 40px minmax(180px,1fr);
+    align-items: end;
+    justify-items: center;
+    margin: 3.5rem auto 0 auto;
+    gap: 0;
+    width: 100%;
+    max-width: 1200px;
+}
+.hero-benefits span {
+    display: inline-block;
+    animation: floatY 2.8s ease-in-out infinite alternate;
+    transition: color 0.3s, transform 0.3s, box-shadow 0.3s;
+    will-change: transform;
+    cursor: pointer;
+    text-align: center;
+    min-width: 120px;
+}
+.hero-benefits span:hover {
+    color: #111;
+    background: #fffbe7;
+    box-shadow: 0 4px 18px #ffd60044, 0 1.5px 8px #ffd60022;
+    transform: scale(1.13) translateY(-8px) rotate(-2deg);
+    z-index: 2;
+}
+@keyframes floatY {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-8px) scale(1.04) rotate(-1deg); }
+    100% { transform: translateY(-16px) scale(1.08) rotate(1deg); }
+}
+.benefit-sep {
+    color: #bbb;
+    font-size: 1.3rem;
+    font-weight: 400;
+    margin: 0;
+    animation: none !important;
+    min-width: 40px;
+    text-align: center;
+}
+@media (max-width: 900px) {
+    .hero-benefits {
+        grid-template-columns: minmax(120px,1fr) 24px minmax(140px,1fr) 24px minmax(120px,1fr);
+        max-width: 98vw;
+    }
+    .hero-benefits span {
+        font-size: 0.92rem;
+        min-width: 80px;
+    }
+    .benefit-sep {
+        font-size: 1.1rem;
+        min-width: 24px;
+    }
 }
   
   
