@@ -49,6 +49,23 @@
                             <option value="nombre-desc">Nombre: Z-A</option>
                         </select>
                     </div>
+                    <div class="productos-view-toggle">
+                        <button id="grid-view" class="view-btn active" title="Vista de cuadrícula">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <rect x="3" y="3" width="8" height="8" />
+                                <rect x="13" y="3" width="8" height="8" />
+                                <rect x="3" y="13" width="8" height="8" />
+                                <rect x="13" y="13" width="8" height="8" />
+                            </svg>
+                        </button>
+                        <button id="list-view" class="view-btn" title="Vista de lista">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <rect x="4" y="5" width="16" height="2" />
+                                <rect x="4" y="11" width="16" height="2" />
+                                <rect x="4" y="17" width="16" height="2" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <div id="loading" style="display: none;">
@@ -533,8 +550,26 @@
             }
         });
 
-        // Cargar productos cuando la página esté lista
-        document.addEventListener('DOMContentLoaded', cargarProductos);
+        // Cargar productos y configurar eventos al iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarProductos();
+
+            const gridBtn = document.getElementById('grid-view');
+            const listBtn = document.getElementById('list-view');
+            const productosGrid = document.getElementById('productos-grid');
+
+            gridBtn.addEventListener('click', () => {
+                productosGrid.classList.remove('list-view');
+                gridBtn.classList.add('active');
+                listBtn.classList.remove('active');
+            });
+
+            listBtn.addEventListener('click', () => {
+                productosGrid.classList.add('list-view');
+                listBtn.classList.add('active');
+                gridBtn.classList.remove('active');
+            });
+        });
     </script>
 
     <!-- Scripts -->
