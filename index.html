@@ -580,7 +580,30 @@
         // Configuración Gemini IA
         const GEMINI_API_KEY = 'AIzaSyA0PkP6I-6U8Rob-i7_kJmKex6d3fePkDg';
         const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
-        const prompt = `Eres un experto en moda y tecnología. Escribe una descripción extensa y muy detallada (mínimo 4 párrafos, usa Markdown y EMOJIS) sobre OutfitAI para la portada de una tienda de moda inteligente. Explica en profundidad qué es, cómo funciona, qué tecnologías utiliza, cómo se integra Gemini IA para las recomendaciones inteligentes y cómo se emplea web scraping para recolectar datos actualizados de moda y productos. Da ejemplos concretos de cómo el usuario puede beneficiarse, menciona posibles escenarios de uso y resalta qué hace especial a la plataforma frente a otras.\n\nIncluye de manera natural en la redacción que OutfitAI es un trabajo en desarrollo por J.C.F.A. y D.E.Q.P.\n\nSé claro, atractivo, profesional y usa emojis relevantes para que el texto sea más ameno y visual.`;
+        const prompt = `🎯 Actúa como un experto en moda inteligente y tecnología.
+Escribe una descripción profesional y atractiva (mínimo 2 párrafos) en formato Markdown para la portada de una tienda de moda inteligente llamada OutfitAI, desarrollada por J.C.F.A. y D.E.Q.P.
+
+La descripción debe ser clara, visual, con un lenguaje moderno y emojis relevantes como 👗🤖🛍️✨.
+
+Debes incluir de forma natural y resumida:
+
+Qué es OutfitAI y cómo funciona 🧠
+
+Uso de Gemini IA para generar recomendaciones inteligentes de moda 🤖
+
+Empleo de web scraping con Python 🐍 para recolectar datos actualizados de tiendas online
+
+Almacenamiento en Firebase ☁️
+
+Frontend desarrollado en HTML, CSS, JavaScript y Node.js
+
+Interacción por medio de un chat de asistencia virtual de moda
+
+Ejemplos concretos de uso: elegir un outfit para una cita, evento, clima, etc.
+
+Qué hace única a la plataforma frente a otras soluciones tradicionales
+
+El texto debe sonar innovador, confiable y visualmente atractivo para el usuario.`;
 
         async function generarDescripcionIA() {
             const loader = document.getElementById('descripcion-ia-loader');

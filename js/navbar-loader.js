@@ -22,6 +22,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 script.src = '/js/menu.js';
                 document.body.appendChild(script);
 
+                // Cargar el script del modal del navbar y ejecutarlo
+                import('./navbar-modal.js').then(mod => {
+                    if (mod && typeof mod.setupIaModal === 'function') {
+                        mod.setupIaModal();
+                    }
+                }).catch(() => {
+                    // fallback si no funciona import (por navegador antiguo)
+                    const modalScript = document.createElement('script');
+                    modalScript.src = '/js/navbar-modal.js';
+                    modalScript.onload = function () {
+                        if (window.setupIaModal) window.setupIaModal();
+                    };
+                    document.body.appendChild(modalScript);
+                });
+
                 // Verificar si el usuario está autenticado y mostrar su nombre
                 import('./firebase-config.js').then(module => {
                     const { auth } = module;
