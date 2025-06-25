@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         .cuestionario-container {
             max-width: 1200px;
@@ -335,9 +336,23 @@
             <div class="grafico-card">
                 <canvas id="demograficosChart"></canvas>
             </div>
+            <div class="grafico-card">
+                <canvas id="nivelEducativoChart"></canvas>
+            </div>
+            <div class="grafico-card">
+                <canvas id="edadChart"></canvas>
+            </div>
+            <div class="grafico-card">
+                <canvas id="frecuenciaChart"></canvas>
+            </div>
         </div>
         <div class="respuestas-container">
-            <h2>Respuestas Individuales</h2>
+            <h2 style="display:flex;align-items:center;gap:0.7rem;">
+                Respuestas Individuales
+                <button id="exportarExcelBtn" title="Exportar a Excel" style="background:none;border:none;cursor:pointer;padding:0;margin-left:0.5rem;">
+                    <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/icons/file-earmark-excel.svg" alt="Exportar a Excel" style="width:2rem;height:2rem;vertical-align:middle;filter:drop-shadow(0 1px 2px #0002);">
+                </button>
+            </h2>
             <div class="table-container">
                 <table id="respuestas-table">
                     <thead>
@@ -348,24 +363,24 @@
                             <th>Edad</th>
                             <th>Educación</th>
                             <th>Frecuencia Compra</th>
-                            <th>Calidad 1</th>
-                            <th>Calidad 2</th>
-                            <th>Personalización 1</th>
-                            <th>Personalización 2</th>
-                            <th>Diversidad 1</th>
-                            <th>Diversidad 2</th>
-                            <th>IA 1</th>
-                            <th>IA 2</th>
-                            <th>IA 3</th>
-                            <th>Indexación 1</th>
-                            <th>Indexación 2</th>
-                            <th>Indexación 3</th>
-                            <th>Usabilidad 1</th>
-                            <th>Usabilidad 2</th>
-                            <th>Satisfacción 1</th>
-                            <th>Satisfacción 2</th>
-                            <th>Fidelización 1</th>
-                            <th>Fidelización 2</th>
+                            <th>Las recomendaciones suelen coincidir con mis gustos personales.</th>
+                            <th>Las recomendaciones abarcan productos realmente relevantes para mí.</th>
+                            <th>Las sugerencias que recibo se ajustan a mis preferencias individuales.</th>
+                            <th>Las recomendaciones me son útiles para decidir qué prendas comprar o usar.</th>
+                            <th>Las recomendaciones me ofrecen una variedad amplia de opciones.</th>
+                            <th>Frecuentemente encuentro prendas novedosas gracias al sistema.</th>
+                            <th>Las recomendaciones generadas por el sistema son precisas gracias al uso de IA.</th>
+                            <th>El sistema aprende de mis elecciones anteriores y mejora con el tiempo.</th>
+                            <th>Percibo que las recomendaciones se adaptan a mis cambios de preferencia.</th>
+                            <th>El sistema responde de forma rápida cuando busco productos.</th>
+                            <th>Las recomendaciones están basadas en información actualizada.</th>
+                            <th>Considero relevante la información mostrada por el sistema.</th>
+                            <th>La plataforma es fácil de entender y utilizar.</th>
+                            <th>No tengo dificultades para completar tareas como buscar o seleccionar productos.</th>
+                            <th>Me siento satisfecho(a) con la experiencia general del sistema.</th>
+                            <th>Continuaré usando la plataforma debido a sus recomendaciones.</th>
+                            <th>Uso la plataforma al menos una vez por semana.</th>
+                            <th>Paso bastante tiempo navegando por las recomendaciones de la plataforma.</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -829,6 +844,9 @@
                 await actualizarGraficoSatisfaccion(respuestas);
                 await actualizarGraficoFidelizacion(respuestas);
                 await actualizarGraficoDemograficos(respuestas);
+                actualizarGraficoNivelEducativo(respuestas);
+                actualizarGraficoEdad(respuestas);
+                actualizarGraficoFrecuencia(respuestas);
                 actualizarTablaRespuestas(respuestas);
                 actualizarTablaMedias(respuestas);
             } catch (error) {
@@ -1190,6 +1208,168 @@
                 }
             });
         }
+        // Función para actualizar gráfico de Nivel Educativo
+        function actualizarGraficoNivelEducativo(respuestas) {
+            destroyChart('nivelEducativo');
+            const ctx = document.getElementById('nivelEducativoChart').getContext('2d');
+            const datos = {};
+            respuestas.forEach(r => {
+                if (r.educacion) {
+                    datos[r.educacion] = (datos[r.educacion] || 0) + 1;
+                }
+            });
+            const labels = Object.keys(datos);
+            const values = Object.values(datos);
+            const coloresVivos = [
+                '#60a5fa', '#f472b6', '#34d399', '#fbbf24', '#a78bfa',
+                '#f87171', '#38bdf8', '#facc15', '#fb7185', '#4ade80'
+            ];
+            const backgroundColors = labels.map((_, i) => coloresVivos[i % coloresVivos.length]);
+            const data = {
+                labels: labels,
+                datasets: [{
+                    label: 'Nivel educativo',
+                    data: values,
+                    backgroundColor: backgroundColors,
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            };
+            renderTituloGrafico('nivelEducativo', 'Nivel educativo', 'Distribución de nivel educativo de los participantes');
+            charts.nivelEducativo = new Chart(ctx, {
+                type: 'pie',
+                data: data,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: { color: '#1e293b', font: { size: 15, weight: 'bold' } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const percentage = ((value / values.reduce((a,b)=>a+b,0)) * 100).toFixed(1);
+                                    return `${context.label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        // Función para actualizar gráfico de Edad
+        function actualizarGraficoEdad(respuestas) {
+            destroyChart('edad');
+            const ctx = document.getElementById('edadChart').getContext('2d');
+            const datos = {};
+            respuestas.forEach(r => {
+                if (r.edad) {
+                    datos[r.edad] = (datos[r.edad] || 0) + 1;
+                }
+            });
+            const labels = Object.keys(datos);
+            const values = Object.values(datos);
+            const coloresVivos = [
+                '#60a5fa', '#f472b6', '#34d399', '#fbbf24', '#a78bfa',
+                '#f87171', '#38bdf8', '#facc15', '#fb7185', '#4ade80'
+            ];
+            const backgroundColors = labels.map((_, i) => coloresVivos[i % coloresVivos.length]);
+            const data = {
+                labels: labels,
+                datasets: [{
+                    label: 'Edad',
+                    data: values,
+                    backgroundColor: backgroundColors,
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            };
+            renderTituloGrafico('edad', 'Edad', 'Distribución de edades de los participantes');
+            charts.edad = new Chart(ctx, {
+                type: 'pie',
+                data: data,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: { color: '#1e293b', font: { size: 15, weight: 'bold' } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const percentage = ((value / values.reduce((a,b)=>a+b,0)) * 100).toFixed(1);
+                                    return `${context.label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        // Función para actualizar gráfico de Frecuencia de Compra
+        function actualizarGraficoFrecuencia(respuestas) {
+            destroyChart('frecuencia');
+            const ctx = document.getElementById('frecuenciaChart').getContext('2d');
+            const datos = {};
+            respuestas.forEach(r => {
+                if (r.frecuencia_compra) {
+                    datos[r.frecuencia_compra] = (datos[r.frecuencia_compra] || 0) + 1;
+                }
+            });
+            const labels = Object.keys(datos);
+            const values = Object.values(datos);
+            const coloresVivos = [
+                '#60a5fa', '#f472b6', '#34d399', '#fbbf24', '#a78bfa',
+                '#f87171', '#38bdf8', '#facc15', '#fb7185', '#4ade80'
+            ];
+            const backgroundColors = labels.map((_, i) => coloresVivos[i % coloresVivos.length]);
+            const data = {
+                labels: labels,
+                datasets: [{
+                    label: 'Frecuencia de compra',
+                    data: values,
+                    backgroundColor: backgroundColors,
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            };
+            renderTituloGrafico('frecuencia', 'Frecuencia de compra', 'Frecuencia de compra online de ropa');
+            charts.frecuencia = new Chart(ctx, {
+                type: 'pie',
+                data: data,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: { color: '#1e293b', font: { size: 15, weight: 'bold' } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const percentage = ((value / values.reduce((a,b)=>a+b,0)) * 100).toFixed(1);
+                                    return `${context.label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        // Exportar a Excel
+        document.getElementById('exportarExcelBtn').addEventListener('click', function() {
+            const table = document.getElementById('respuestas-table');
+            const wb = XLSX.utils.table_to_book(table, {sheet: 'Respuestas'});
+            XLSX.writeFile(wb, 'respuestas_cuestionario.xlsx');
+        });
     </script>
     <script type="module" src="js/firebase-config.js"></script>
 </body>
